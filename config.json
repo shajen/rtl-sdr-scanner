@@ -1,0 +1,24 @@
+{
+  "frequencies_ranges": [
+    {
+      "start": 144000000,
+      "stop": 146000000,
+      "step": 12500,
+      "minimal_power": 0
+    }
+  ],
+  "ignored_frequencies": {
+    "scan": {
+      "count": 1,
+      "sleep": 1,
+      "integration_interval": 1,
+      "mode": "union"
+    },
+    "manual": [
+      145000000,
+      144000000
+    ]
+  },
+  "integration_interval": 1,
+  "ppm_error": 31
+}
