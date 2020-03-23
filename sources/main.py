@@ -68,6 +68,6 @@ if __name__ == "__main__":
                 frequency_power = sorted(frequency_power, key=lambda d: d[1])
                 if args.log_frequencies > 0:
                     for (frequency, power) in frequency_power[-args.log_frequencies : -1]:
-                        logger.debug("frequnecy: %s, power: %5.2f dB" % (sdr.tools.format_frequnecy(frequency), power))
+                        logger.debug("frequnecy: %s, power: %5.2f dB %s" % (sdr.tools.format_frequnecy(frequency), power, sdr.tools.format_power(power)))
                 for (frequency, power) in frequency_power[-1:]:
-                    logger.info("frequnecy: %s, power: %5.2f dB" % (sdr.tools.format_frequnecy(frequency), power))
+                    logger.info("frequnecy: %s, power: %5.2f dB %s" % (sdr.tools.format_frequnecy(frequency), power, sdr.tools.format_power(power)))
