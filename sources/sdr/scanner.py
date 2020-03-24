@@ -15,7 +15,7 @@ def get_nearest_frequency_power(**kwargs):
     ppm_error = kwargs["ppm_error"]
 
     proc = subprocess.Popen(
-        ["rtl_power", "-f", "%s:%s:%s" % (start, stop, step), "-i", str(integration_interval), "-1", "-p", str(ppm_error),],
+        ["rtl_power", "-c", "0.25", "-f", "%s:%s:%s" % (start, stop, step), "-i", str(integration_interval), "-1", "-p", str(ppm_error),],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
     )
@@ -36,7 +36,8 @@ def get_nearest_frequency_power(**kwargs):
 def get_exact_frequency_power(**kwargs):
     start = kwargs["start"]
     step = kwargs["step"]
-    ignored_frequencies = kwargs["ignored_frequencies"]
+    ignored_ranges_frequencies = kwargs["ignored_ranges_frequencies"]
+    ignored_exact_frequencies = kwargs["ignored_exact_frequencies"]
     minimal_power = kwargs["minimal_power"]
 
     nearest_frequency = get_nearest_frequency_power(**kwargs)
@@ -45,7 +46,12 @@ def get_exact_frequency_power(**kwargs):
     for ((frequency_left, power_left), (frequency_right, power_right)) in zip(nearest_frequency[::2], nearest_frequency[1::2]):
         while frequency < frequency_left:
             frequency += step
-        if frequency_left <= frequency and frequency <= frequency_right and frequency not in ignored_frequencies:
+        if (
+            frequency_left <= frequency
+            and frequency <= frequency_right
+            and frequency not in ignored_exact_frequencies
+            and not any([start <= frequency and frequency <= stop for [start, stop] in ignored_ranges_frequencies])
+        ):
             power = max(power_left, power_right)
             if minimal_power <= power:
                 frequency_power.append((frequency, power))
@@ -84,21 +90,24 @@ def get_ignored_frequencies_from_range(**kwargs):
 
 def get_ignored_frequencies(**kwargs):
     logger = logging.getLogger("sdr")
-    logger.info("scaning ignored frequencies")
 
     count = kwargs["count"]
-    ignored_frequencies = kwargs["manual"]
     frequencies_ranges = kwargs["frequencies_ranges"]
-    kwargs["ignored_frequencies"] = []
+    kwargs["ignored_ranges_frequencies"] = []
+    kwargs["ignored_exact_frequencies"] = []
 
-    if count > 0:
-        for range in frequencies_ranges:
-            kwargs["start"] = range["start"]
-            kwargs["stop"] = range["stop"]
-            kwargs["step"] = range["step"]
-            kwargs["minimal_power"] = range["minimal_power"]
-            ignored_frequencies.extend(get_ignored_frequencies_from_range(**kwargs))
+    if count <= 0:
+        return []
+    logger.info("scaning ignored frequencies")
+    ignored_frequencies = []
+    for range in frequencies_ranges:
+        kwargs["start"] = range["start"]
+        kwargs["stop"] = range["stop"]
+        kwargs["step"] = range["step"]
+        kwargs["minimal_power"] = range["minimal_power"]
+        kwargs["integration_interval"] = range["integration_interval"]
+        ignored_frequencies.extend(get_ignored_frequencies_from_range(**kwargs))
 
-    logger.info("all ranges ignored frequencies (%d): %s" % (len(ignored_frequencies), sdr.tools.format_frequnecies(ignored_frequencies)))
+    logger.info("all ignored frequency ranges found (%d): %s" % (len(ignored_frequencies), sdr.tools.format_frequnecies(ignored_frequencies)))
 
     return ignored_frequencies

@@ -3,22 +3,39 @@
     {
       "start": 144000000,
       "stop": 146000000,
-      "step": 12500,
-      "minimal_power": 0
+      "step": 2500,
+      "minimal_power": 0,
+      "integration_interval": 1
+    },
+    {
+      "start": 430000000,
+      "stop": 450000000,
+      "step": 2500,
+      "minimal_power": 0,
+      "integration_interval": 10
     }
   ],
   "ignored_frequencies": {
     "scan": {
-      "count": 1,
-      "sleep": 1,
-      "integration_interval": 1,
+      "count": 0,
+      "sleep": 3,
       "mode": "union"
     },
-    "manual": [
-      145000000,
-      144000000
+    "exact": [],
+    "ranges": [
+      [
+        432012500,
+        432015000
+      ],
+      [
+        438490000,
+        438500000
+      ],
+      [
+        448002500,
+        448017500
+      ]
     ]
   },
-  "integration_interval": 1,
   "ppm_error": 31
 }
