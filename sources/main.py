@@ -85,6 +85,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     config_logger(args.verbose)
+    logger = logging.getLogger("main")
     with open(args.config) as f:
         config = json.load(f)
 
@@ -105,7 +106,9 @@ if __name__ == "__main__":
             ignored_exact_frequencies=ignored_exact_frequencies,
             ignored_found_frequencies=ignored_found_frequencies,
         )
+        logger.info("#" * 80)
         print_frequencies_ranges(frequencies_ranges=config["frequencies_ranges"])
+        logger.info("#" * 80)
         while True:
             scan(
                 config=config,

@@ -20,6 +20,11 @@ def get_nearest_frequency_power(**kwargs):
         stderr=subprocess.PIPE,
     )
     stdout, _ = proc.communicate()
+    if not stdout:
+        logger = logging.getLogger("sdr")
+        logger.error("rtl_power error!")
+        logger.error("Please ensure rtl_power command work!")
+        exit(1)
     for line in stdout.decode("utf-8").strip().split("\n"):
         data = line.split(",")
         offset = 0
