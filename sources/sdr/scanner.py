@@ -68,7 +68,7 @@ def get_ignored_frequencies_from_range(**kwargs):
 
     logger = logging.getLogger("sdr")
     logger.debug(
-        "scaning for ignored frequencies (%s - %s, step: %s)"
+        "scanning for ignored frequency in frequency range: %s - %s, step: %s"
         % (sdr.tools.format_frequnecy(start), sdr.tools.format_frequnecy(stop), sdr.tools.format_frequnecy(step))
     )
 
@@ -84,13 +84,11 @@ def get_ignored_frequencies_from_range(**kwargs):
             frequencies.intersection_update(new_frequencies)
         else:
             frequencies.update(new_frequencies)
-        logger.debug("found ignored frequencies (%d): %s" % (len(frequencies), sdr.tools.format_frequnecies(sorted(frequencies))))
+        logger.debug("ignored frequencies found (%d): %s" % (len(frequencies), sdr.tools.format_frequnecies(sorted(frequencies))))
     return sorted(frequencies)
 
 
 def get_ignored_frequencies(**kwargs):
-    logger = logging.getLogger("sdr")
-
     count = kwargs["count"]
     frequencies_ranges = kwargs["frequencies_ranges"]
     kwargs["ignored_ranges_frequencies"] = []
@@ -98,7 +96,6 @@ def get_ignored_frequencies(**kwargs):
 
     if count <= 0:
         return []
-    logger.info("scaning ignored frequencies")
     ignored_frequencies = []
     for range in frequencies_ranges:
         kwargs["start"] = range["start"]
@@ -107,7 +104,5 @@ def get_ignored_frequencies(**kwargs):
         kwargs["minimal_power"] = range["minimal_power"]
         kwargs["integration_interval"] = range["integration_interval"]
         ignored_frequencies.extend(get_ignored_frequencies_from_range(**kwargs))
-
-    logger.info("all ignored frequency ranges found (%d): %s" % (len(ignored_frequencies), sdr.tools.format_frequnecies(ignored_frequencies)))
 
     return ignored_frequencies

@@ -8,10 +8,72 @@ import argparse
 
 
 def config_logger(verbose):
-    logging.getLogger("tensorflow").setLevel(logging.ERROR)
     levels = [logging.ERROR, logging.WARNING, logging.INFO, logging.DEBUG]
     level = levels[min(len(levels) - 1, verbose)]
     logging.basicConfig(format="[%(asctime)s][%(levelname)7s][%(name)6s] %(message)s", level=level, datefmt="%Y-%m-%d %H:%M:%S")
+
+
+def print_ignored_frequencies(**kwargs):
+    logger = logging.getLogger("main")
+    ignored_exact_frequencies = kwargs["ignored_exact_frequencies"]
+    ignored_ranges_frequencies = kwargs["ignored_ranges_frequencies"]
+    ignored_found_frequencies = kwargs["ignored_found_frequencies"]
+
+    for frequnecy in ignored_exact_frequencies:
+        logger.info("ignored frequency user defined: %s" % sdr.tools.format_frequnecy(frequnecy))
+    for [start, stop] in ignored_ranges_frequencies:
+        logger.info("ignored frequency range user defined: %s - %s" % (sdr.tools.format_frequnecy(start), sdr.tools.format_frequnecy(stop)))
+    for frequnecy in ignored_found_frequencies:
+        logger.info("ignored frequency found: %s" % sdr.tools.format_frequnecy(frequnecy))
+
+
+def print_frequencies_ranges(**kwargs):
+    logger = logging.getLogger("main")
+    frequencies_ranges = kwargs["frequencies_ranges"]
+
+    for range in frequencies_ranges:
+        start = range["start"]
+        stop = range["stop"]
+        step = range["step"]
+        logger.info(
+            "scanned frequency ranges: %s - %s, step: %s"
+            % (sdr.tools.format_frequnecy(start), sdr.tools.format_frequnecy(stop), sdr.tools.format_frequnecy(step))
+        )
+
+
+def scan(**kwargs):
+    logger = logging.getLogger("main")
+    config = kwargs["config"]
+    ignored_ranges_frequencies = kwargs["ignored_ranges_frequencies"]
+    ignored_exact_frequencies = kwargs["ignored_exact_frequencies"]
+    ignored_found_frequencies = kwargs["ignored_found_frequencies"]
+
+    for range in config["frequencies_ranges"]:
+        start = range["start"]
+        stop = range["stop"]
+        step = range["step"]
+        minimal_power = range["minimal_power"]
+        integration_interval = range["integration_interval"]
+
+        frequency_power = sdr.scanner.get_exact_frequency_power(
+            start=start,
+            stop=stop,
+            step=step,
+            integration_interval=integration_interval,
+            ppm_error=ppm_error,
+            minimal_power=minimal_power,
+            ignored_ranges_frequencies=ignored_ranges_frequencies,
+            ignored_exact_frequencies=ignored_exact_frequencies + ignored_found_frequencies,
+        )
+        frequency_power = sorted(frequency_power, key=lambda d: d[1])
+        if args.log_frequencies > 0:
+            for (frequency, power) in frequency_power[-args.log_frequencies : -1]:
+                logger.debug(sdr.tools.format_frequnecy_power(frequency, power))
+        if frequency_power:
+            for (frequency, power) in frequency_power[-1:]:
+                logger.info(sdr.tools.format_frequnecy_power(frequency, power))
+        elif args.show_zero_signal:
+            logger.info(sdr.tools.format_frequnecy_power(0, 0))
 
 
 if __name__ == "__main__":
@@ -23,7 +85,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     config_logger(args.verbose)
-    logger = logging.getLogger("main")
     with open(args.config) as f:
         config = json.load(f)
 
@@ -31,7 +92,7 @@ if __name__ == "__main__":
 
         ignored_ranges_frequencies = config["ignored_frequencies"]["ranges"]
         ignored_exact_frequencies = config["ignored_frequencies"]["exact"]
-        ignored_exact_frequencies += sdr.scanner.get_ignored_frequencies(
+        ignored_found_frequencies = sdr.scanner.get_ignored_frequencies(
             ppm_error=ppm_error,
             frequencies_ranges=config["frequencies_ranges"],
             count=config["ignored_frequencies"]["scan"]["count"],
@@ -39,40 +100,16 @@ if __name__ == "__main__":
             sleep=config["ignored_frequencies"]["scan"]["sleep"],
         )
 
-        for range in config["frequencies_ranges"]:
-            start = range["start"]
-            stop = range["stop"]
-            step = range["step"]
-            minimal_power = range["minimal_power"]
-            logger.info(
-                "scaning for active frequencies (%s - %s, step: %s)"
-                % (sdr.tools.format_frequnecy(start), sdr.tools.format_frequnecy(stop), sdr.tools.format_frequnecy(step))
-            )
-
+        print_ignored_frequencies(
+            ignored_ranges_frequencies=ignored_ranges_frequencies,
+            ignored_exact_frequencies=ignored_exact_frequencies,
+            ignored_found_frequencies=ignored_found_frequencies,
+        )
+        print_frequencies_ranges(frequencies_ranges=config["frequencies_ranges"])
         while True:
-            for range in config["frequencies_ranges"]:
-                start = range["start"]
-                stop = range["stop"]
-                step = range["step"]
-                minimal_power = range["minimal_power"]
-                integration_interval = range["integration_interval"]
-
-                frequency_power = sdr.scanner.get_exact_frequency_power(
-                    start=start,
-                    stop=stop,
-                    step=step,
-                    integration_interval=integration_interval,
-                    ppm_error=ppm_error,
-                    minimal_power=minimal_power,
-                    ignored_ranges_frequencies=ignored_ranges_frequencies,
-                    ignored_exact_frequencies=ignored_exact_frequencies,
-                )
-                frequency_power = sorted(frequency_power, key=lambda d: d[1])
-                if args.log_frequencies > 0:
-                    for (frequency, power) in frequency_power[-args.log_frequencies : -1]:
-                        logger.debug(sdr.tools.format_frequnecy_power(frequency, power))
-                if frequency_power:
-                    for (frequency, power) in frequency_power[-1:]:
-                        logger.info(sdr.tools.format_frequnecy_power(frequency, power))
-                elif args.show_zero_signal:
-                    logger.info(sdr.tools.format_frequnecy_power(0, 0))
+            scan(
+                config=config,
+                ignored_ranges_frequencies=ignored_ranges_frequencies,
+                ignored_exact_frequencies=ignored_exact_frequencies,
+                ignored_found_frequencies=ignored_found_frequencies,
+            )
