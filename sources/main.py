@@ -7,7 +7,9 @@ import logging
 import os
 import sdr.scanner
 import sdr.tools
+import subprocess
 import sys
+import time
 
 
 def config_logger(verbose, dir):
@@ -67,12 +69,66 @@ def print_frequencies_ranges(**kwargs):
         logger.info("scanned frequency range: %s" % (sdr.tools.format_frequnecy_range(start, stop, step)))
 
 
+def record(frequency, **kwargs):
+    logger = logging.getLogger("main")
+    logger.info("start recording frequnecy: %s" % sdr.tools.format_frequnecy(frequency))
+    rate = str(kwargs["rate"])
+    modulation = kwargs["modulation"]
+    ppm_error = str(kwargs["ppm_error"])
+    squelch = str(kwargs["squelch"])
+    dir = kwargs["dir"]
+    timeout = kwargs["timeout"]
+
+    now = datetime.datetime.now()
+    dir = "%s/%04d-%02d-%02d" % (dir, now.year, now.month, now.day)
+    os.makedirs(dir, exist_ok=True)
+    filename = "%s/%02d_%02d_%02d_%09d.wav" % (dir, now.hour, now.minute, now.second, frequency)
+
+    p1 = subprocess.Popen(
+        ["rtl_fm", "-p", ppm_error, "-g", "0", "-M", modulation, "-f", str(frequency), "-s", rate, "-l", squelch],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.DEVNULL,
+    )
+    p2 = subprocess.Popen(
+        ["sox", "-t", "raw", "-e", "signed", "-c", "1", "-b", "16", "-r", rate, "-", filename],
+        stdin=p1.stdout,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.DEVNULL,
+    )
+
+    factor = 4
+    time.sleep(1 / factor)
+    last_size = 0
+    for _ in range(timeout * factor):
+        size = os.path.getsize(filename)
+        if size == last_size:
+            break
+        else:
+            last_size = size
+        time.sleep(1 / factor)
+
+    p1.terminate()
+    p2.terminate()
+    p1.wait()
+    p2.wait()
+    logger.info("stop recording frequnecy: %s" % sdr.tools.format_frequnecy(frequency))
+
+    if size <= 100:
+        os.remove(filename)
+        logger.warning("recording too short, removing")
+
+
 def scan(**kwargs):
     logger = logging.getLogger("main")
+    ppm_error = kwargs["ppm_error"]
+    wav_dir = kwargs["wav_dir"]
     config = kwargs["config"]
     ignored_ranges_frequencies = kwargs["ignored_ranges_frequencies"]
     ignored_exact_frequencies = kwargs["ignored_exact_frequencies"]
     ignored_found_frequencies = kwargs["ignored_found_frequencies"]
+    rate = config["rate"]
+    squelch = config["squelch"]
+    timeout = config["timeout"]
 
     for range in config["frequencies_ranges"]:
         start = range["start"]
@@ -80,6 +136,7 @@ def scan(**kwargs):
         step = range["step"]
         minimal_power = range["minimal_power"]
         integration_interval = range["integration_interval"]
+        modulation = range["modulation"]
 
         frequency_power = sdr.scanner.get_exact_frequency_power(
             start=start,
@@ -93,11 +150,11 @@ def scan(**kwargs):
         )
         frequency_power = sorted(frequency_power, key=lambda d: d[1])
         if args.log_frequencies > 0:
-            for (frequency, power) in frequency_power[-args.log_frequencies : -1]:
+            for (frequency, power) in frequency_power[-args.log_frequencies :]:
                 logger.debug(sdr.tools.format_frequnecy_power(frequency, power))
         if frequency_power:
-            for (frequency, power) in frequency_power[-1:]:
-                logger.info(sdr.tools.format_frequnecy_power(frequency, power))
+            (frequency, power) = frequency_power[-1]
+            record(frequency, rate=rate, modulation=modulation, ppm_error=ppm_error, squelch=squelch, dir=wav_dir, timeout=timeout)
         elif args.show_zero_signal:
             logger.info(sdr.tools.format_frequnecy_power(0, 0))
 
@@ -107,6 +164,7 @@ if __name__ == "__main__":
     parser.add_argument("config", help="path to config file", type=str, metavar="file")
     parser.add_argument("-lf", "--log_frequencies", help="print n best signals per range", type=int, default=3, metavar="n")
     parser.add_argument("-ld", "--log_directory", help="store output log in directory", type=str, metavar="dir")
+    parser.add_argument("-wd", "--wav_directory", help="store output wav in directory", type=str, metavar="dir", default="wav")
     parser.add_argument("-z", "--show_zero_signal", help="print zero signal if not found any better", action="store_true")
     parser.add_argument("-v", "--verbose", action="count", default=0)
     args = parser.parse_args()
@@ -136,7 +194,9 @@ if __name__ == "__main__":
         separator("scanning started")
         while True:
             scan(
+                ppm_error=ppm_error,
                 config=config,
+                wav_dir=args.wav_directory,
                 ignored_ranges_frequencies=ignored_ranges_frequencies,
                 ignored_exact_frequencies=ignored_exact_frequencies,
                 ignored_found_frequencies=ignored_found_frequencies,

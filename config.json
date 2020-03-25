@@ -1,32 +1,28 @@
 {
   "frequencies_ranges": [
     {
+      "start": 118000000,
+      "stop": 137000000,
+      "step": 2500,
+      "minimal_power": 0,
+      "integration_interval": 1,
+      "modulation": "am"
+    },
+    {
       "start": 144000000,
       "stop": 146000000,
       "step": 2500,
       "minimal_power": 0,
-      "integration_interval": 1
+      "integration_interval": 1,
+      "modulation": "fm"
     },
     {
       "start": 430000000,
-      "stop": 446000000,
-      "step": 2500,
-      "minimal_power": 0,
-      "integration_interval": 8
-    },
-    {
-      "start": 446006250,
-      "stop": 446193750,
-      "step": 12500,
-      "minimal_power": 0,
-      "integration_interval": 1
-    },
-    {
-      "start": 446200000,
       "stop": 450000000,
       "step": 2500,
       "minimal_power": 0,
-      "integration_interval": 2
+      "integration_interval": 1,
+      "modulation": "fm"
     }
   ],
   "ignored_frequencies": {
@@ -35,7 +31,13 @@
       "sleep": 3,
       "mode": "union"
     },
-    "exact": [],
+    "exact": [
+      118402500,
+      120002500,
+      120250000,
+      124327500,
+      125000000
+    ],
     "ranges": [
       [
         432012500,
@@ -51,5 +53,8 @@
       ]
     ]
   },
-  "ppm_error": 31
+  "ppm_error": 31,
+  "rate": 48000,
+  "squelch": 50,
+  "timeout": 10
 }
