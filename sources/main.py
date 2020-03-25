@@ -7,6 +7,7 @@ import logging
 import os
 import sdr.scanner
 import sdr.tools
+import signal
 import subprocess
 import sys
 import time
@@ -159,6 +160,19 @@ def scan(**kwargs):
             logger.info(sdr.tools.format_frequnecy_power(0, 0))
 
 
+class ApplicationKiller:
+    is_running = True
+
+    def __init__(self):
+        signal.signal(signal.SIGINT, self.exit)
+        signal.signal(signal.SIGTERM, self.exit)
+
+    def exit(self, signum, frame):
+        logger = logging.getLogger("main")
+        logger.warning("stopping application")
+        self.is_running = False
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("config", help="path to config file", type=str, metavar="file")
@@ -192,7 +206,9 @@ if __name__ == "__main__":
         )
         print_frequencies_ranges(frequencies_ranges=config["frequencies_ranges"])
         separator("scanning started")
-        while True:
+
+        killer = ApplicationKiller()
+        while killer.is_running:
             scan(
                 ppm_error=ppm_error,
                 config=config,
