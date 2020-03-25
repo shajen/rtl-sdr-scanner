@@ -1,16 +1,31 @@
 #!/usr/bin/python3
 
-import json
-import sdr.tools
-import sdr.scanner
-import logging
 import argparse
+import datetime
+import json
+import logging
+import os
+import sdr.scanner
+import sdr.tools
+import sys
 
 
-def config_logger(verbose):
+def config_logger(verbose, dir):
+    params = {}
+
     levels = [logging.ERROR, logging.WARNING, logging.INFO, logging.DEBUG]
     level = levels[min(len(levels) - 1, verbose)]
-    logging.basicConfig(format="[%(asctime)s][%(levelname)7s][%(name)6s] %(message)s", level=level, datefmt="%Y-%m-%d %H:%M:%S")
+
+    params["format"] = "[%(asctime)s][%(levelname)7s][%(name)6s] %(message)s"
+    params["level"] = level
+    params["datefmt"] = "%Y-%m-%d %H:%M:%S"
+
+    if dir:
+        now = datetime.datetime.now()
+        os.makedirs("%s/%04d-%02d-%02d" % (dir, now.year, now.month, now.day), exist_ok=True)
+        filename = "%s/%04d-%02d-%02d/%02d_%02d_%02d.txt" % (dir, now.year, now.month, now.day, now.hour, now.minute, now.second)
+        params["filename"] = filename
+    logging.basicConfig(**params)
 
 
 def separator(label, **kwargs):
@@ -91,11 +106,12 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("config", help="path to config file", type=str, metavar="file")
     parser.add_argument("-lf", "--log_frequencies", help="print n best signals per range", type=int, default=3, metavar="n")
+    parser.add_argument("-ld", "--log_directory", help="store output log in directory", type=str, metavar="dir")
     parser.add_argument("-z", "--show_zero_signal", help="print zero signal if not found any better", action="store_true")
     parser.add_argument("-v", "--verbose", action="count", default=0)
     args = parser.parse_args()
 
-    config_logger(args.verbose)
+    config_logger(args.verbose, args.log_directory)
     with open(args.config) as f:
         config = json.load(f)
 
