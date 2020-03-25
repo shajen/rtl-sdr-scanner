@@ -72,10 +72,7 @@ def get_ignored_frequencies_from_range(**kwargs):
     mode = kwargs["mode"]
 
     logger = logging.getLogger("sdr")
-    logger.debug(
-        "scanning for ignored frequency in frequency range: %s - %s, step: %s"
-        % (sdr.tools.format_frequnecy(start), sdr.tools.format_frequnecy(stop), sdr.tools.format_frequnecy(step))
-    )
+    logger.debug("scanning for ignored frequency in frequency range: %s" % sdr.tools.format_frequnecy_range(start, stop, step))
 
     if mode == "intersection":
         frequencies = set(range(start, stop + step, step))

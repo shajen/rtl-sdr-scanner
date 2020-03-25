@@ -14,7 +14,7 @@ def format_frequnecy(frequency):
     if frequency == 0:
         return "0 MHz"
     elif frequency >= 1000000:
-        return "%.4f MHz" % (frequency / 1000000)
+        return "{:,.2f} MHz".format(frequency / 1000)
     elif frequency >= 1000:
         return "%.1f kHz" % (frequency / 1000)
     else:
@@ -22,11 +22,18 @@ def format_frequnecy(frequency):
 
 
 def format_frequnecy_power(frequency, power):
-    return "frequnecy: %12s, power: %5.2f dB %s" % (format_frequnecy(frequency), power, format_power(power))
+    return "frequnecy: %14s, power: %5.2f dB %s" % (format_frequnecy(frequency), power, format_power(power))
 
 
 def format_frequnecies(frequencies):
     return ", ".join([format_frequnecy(f) for f in frequencies])
+
+
+def format_frequnecy_range(start, stop, step=0):
+    if step == 0:
+        return "%s - %s" % (format_frequnecy(start), format_frequnecy(stop))
+    else:
+        return "%s - %s, step: %8s" % (format_frequnecy(start), format_frequnecy(stop), format_frequnecy(step))
 
 
 def format_bar(value, **kwargs):

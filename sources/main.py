@@ -28,7 +28,7 @@ def print_ignored_frequencies(**kwargs):
     for frequnecy in ignored_exact_frequencies:
         logger.info("ignored frequency user defined: %s" % sdr.tools.format_frequnecy(frequnecy))
     for [start, stop] in ignored_ranges_frequencies:
-        logger.info("ignored frequency range user defined: %s - %s" % (sdr.tools.format_frequnecy(start), sdr.tools.format_frequnecy(stop)))
+        logger.info("ignored frequency range user defined: %s" % (sdr.tools.format_frequnecy_range(start, stop)))
     for frequnecy in ignored_found_frequencies:
         logger.info("ignored frequency found: %s" % sdr.tools.format_frequnecy(frequnecy))
 
@@ -42,10 +42,7 @@ def print_frequencies_ranges(**kwargs):
         start = range["start"]
         stop = range["stop"]
         step = range["step"]
-        logger.info(
-            "scanned frequency ranges: %s - %s, step: %s"
-            % (sdr.tools.format_frequnecy(start), sdr.tools.format_frequnecy(stop), sdr.tools.format_frequnecy(step))
-        )
+        logger.info("scanned frequency range: %s" % (sdr.tools.format_frequnecy_range(start, stop, step)))
 
 
 def scan(**kwargs):

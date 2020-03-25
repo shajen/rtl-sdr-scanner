@@ -9,10 +9,24 @@
     },
     {
       "start": 430000000,
+      "stop": 446000000,
+      "step": 2500,
+      "minimal_power": 0,
+      "integration_interval": 8
+    },
+    {
+      "start": 446006250,
+      "stop": 446193750,
+      "step": 12500,
+      "minimal_power": 0,
+      "integration_interval": 1
+    },
+    {
+      "start": 446200000,
       "stop": 450000000,
       "step": 2500,
       "minimal_power": 0,
-      "integration_interval": 10
+      "integration_interval": 2
     }
   ],
   "ignored_frequencies": {
