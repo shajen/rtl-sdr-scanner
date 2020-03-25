@@ -13,9 +13,16 @@ def config_logger(verbose):
     logging.basicConfig(format="[%(asctime)s][%(levelname)7s][%(name)6s] %(message)s", level=level, datefmt="%Y-%m-%d %H:%M:%S")
 
 
-def separator(label):
+def separator(label, **kwargs):
+    length = kwargs.get("length", 80)
     logger = logging.getLogger("main")
-    logger.info("#" * 80)
+
+    l1 = int((length - len(label) - 2) / 2)
+    l2 = (l1 + 1) if len(label) % 2 else l1
+    logger.info("")
+    logger.info("#" * length)
+    logger.info("%s %s %s" % ("#" * l1, label.upper(), "#" * l2))
+    logger.info("#" * length)
 
 
 def print_ignored_frequencies(**kwargs):
