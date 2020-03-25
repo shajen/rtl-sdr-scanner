@@ -13,7 +13,13 @@ def config_logger(verbose):
     logging.basicConfig(format="[%(asctime)s][%(levelname)7s][%(name)6s] %(message)s", level=level, datefmt="%Y-%m-%d %H:%M:%S")
 
 
+def separator(label):
+    logger = logging.getLogger("main")
+    logger.info("#" * 80)
+
+
 def print_ignored_frequencies(**kwargs):
+    separator("ignored frequencies")
     logger = logging.getLogger("main")
     ignored_exact_frequencies = kwargs["ignored_exact_frequencies"]
     ignored_ranges_frequencies = kwargs["ignored_ranges_frequencies"]
@@ -28,6 +34,7 @@ def print_ignored_frequencies(**kwargs):
 
 
 def print_frequencies_ranges(**kwargs):
+    separator("scanning ranges")
     logger = logging.getLogger("main")
     frequencies_ranges = kwargs["frequencies_ranges"]
 
@@ -85,7 +92,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     config_logger(args.verbose)
-    logger = logging.getLogger("main")
     with open(args.config) as f:
         config = json.load(f)
 
@@ -106,9 +112,8 @@ if __name__ == "__main__":
             ignored_exact_frequencies=ignored_exact_frequencies,
             ignored_found_frequencies=ignored_found_frequencies,
         )
-        logger.info("#" * 80)
         print_frequencies_ranges(frequencies_ranges=config["frequencies_ranges"])
-        logger.info("#" * 80)
+        separator("scanning started")
         while True:
             scan(
                 config=config,
