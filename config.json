@@ -1,14 +1,6 @@
 {
   "frequencies_ranges": [
     {
-      "start": 118000000,
-      "stop": 137000000,
-      "step": 2500,
-      "minimal_power": 0,
-      "integration_interval": 1,
-      "modulation": "am"
-    },
-    {
       "start": 144000000,
       "stop": 146000000,
       "step": 2500,
@@ -31,13 +23,7 @@
       "sleep": 3,
       "mode": "union"
     },
-    "exact": [
-      118402500,
-      120002500,
-      120250000,
-      124327500,
-      125000000
-    ],
+    "exact": [],
     "ranges": [
       [
         432012500,

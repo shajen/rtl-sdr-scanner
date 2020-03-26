@@ -13,18 +13,30 @@ def get_nearest_frequency_power(**kwargs):
     step = kwargs["step"]
     integration_interval = kwargs["integration_interval"]
     ppm_error = kwargs["ppm_error"]
+    logger = logging.getLogger("sdr")
 
-    proc = subprocess.Popen(
-        ["rtl_power", "-c", "0.25", "-f", "%s:%s:%s" % (start, stop, step), "-i", str(integration_interval), "-1", "-p", str(ppm_error),],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-    )
-    stdout, _ = proc.communicate()
-    if not stdout:
-        logger = logging.getLogger("sdr")
-        logger.error("rtl_power error!")
-        logger.error("Please ensure rtl_power command work!")
+    try:
+        proc = subprocess.Popen(
+            ["rtl_power", "-c", "0.25", "-f", "%s:%s:%s" % (start, stop, step), "-i", str(integration_interval), "-1", "-p", str(ppm_error),],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+        stdout, stderr = proc.communicate(timeout=integration_interval + 5)
+    except FileNotFoundError:
+        logger.error("rtl_power not found! Please install rtl_sdr!")
         exit(1)
+    except subprocess.TimeoutExpired:
+        logger.error("rtl_power timeout! Please ensure rtl_power work!")
+        exit(1)
+    if not stdout:
+        stderr = stderr.decode()
+        if "user cancel" not in stderr.lower():
+            logger.error("rtl_power error! Please ensure rtl_power work!")
+            logger.error("exit code: %d" % proc.returncode)
+            for line in stderr.split("\n"):
+                logger.error("stderr: %s" % line)
+            exit(1)
+        exit(0)
     for line in stdout.decode("utf-8").strip().split("\n"):
         data = line.split(",")
         offset = 0
