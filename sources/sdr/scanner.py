@@ -4,6 +4,7 @@ import subprocess
 import time
 import logging
 import sdr.tools
+import sdr.recorder
 
 
 def get_nearest_frequency_power(**kwargs):
@@ -120,3 +121,60 @@ def get_ignored_frequencies(**kwargs):
         ignored_frequencies.extend(get_ignored_frequencies_from_range(**kwargs))
 
     return ignored_frequencies
+
+
+def scan(**kwargs):
+    logger = logging.getLogger("main")
+    ppm_error = kwargs["ppm_error"]
+    wav_dir = kwargs["wav_dir"]
+    config = kwargs["config"]
+    log_frequencies = kwargs["log_frequencies"]
+    show_zero_signal = kwargs["show_zero_signal"]
+    ignored_ranges_frequencies = kwargs["ignored_ranges_frequencies"]
+    ignored_exact_frequencies = kwargs["ignored_exact_frequencies"]
+    ignored_found_frequencies = kwargs["ignored_found_frequencies"]
+    rate = config["rate"]
+    squelch = config["squelch"]
+    min_recording_time = config["min_recording_time"]
+    max_recording_time = config["max_recording_time"]
+    max_silence_time = config["max_silence_time"]
+
+    for range in config["frequencies_ranges"]:
+        start = range["start"]
+        stop = range["stop"]
+        step = range["step"]
+        minimal_power = range["minimal_power"]
+        integration_interval = range["integration_interval"]
+        modulation = range["modulation"]
+
+        frequency_power = sdr.scanner.get_exact_frequency_power(
+            start=start,
+            stop=stop,
+            step=step,
+            integration_interval=integration_interval,
+            ppm_error=ppm_error,
+            minimal_power=minimal_power,
+            ignored_ranges_frequencies=ignored_ranges_frequencies,
+            ignored_exact_frequencies=ignored_exact_frequencies + ignored_found_frequencies,
+        )
+        frequency_power = sorted(frequency_power, key=lambda d: d[1])
+        if log_frequencies > 0:
+            if frequency_power:
+                for (frequency, power) in frequency_power[-log_frequencies:]:
+                    logger.debug(sdr.tools.format_frequnecy_power(frequency, power))
+            elif show_zero_signal:
+                logger.debug(sdr.tools.format_frequnecy_power(0, 0))
+
+        if frequency_power:
+            (frequency, power) = frequency_power[-1]
+            sdr.recorder.record(
+                frequency,
+                rate=rate,
+                modulation=modulation,
+                ppm_error=ppm_error,
+                squelch=squelch,
+                dir=wav_dir,
+                min_recording_time=min_recording_time,
+                max_recording_time=max_recording_time,
+                max_silence_time=max_silence_time,
+            )

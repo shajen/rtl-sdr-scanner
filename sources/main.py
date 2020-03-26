@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+import application_killer
 import argparse
 import datetime
 import json
@@ -7,11 +8,6 @@ import logging
 import os
 import sdr.scanner
 import sdr.tools
-import signal
-import subprocess
-import sys
-import time
-import wave
 
 
 def config_logger(verbose, dir):
@@ -71,129 +67,6 @@ def print_frequencies_ranges(**kwargs):
         logger.info("scanned frequency range: %s" % (sdr.tools.format_frequnecy_range(start, stop, step)))
 
 
-def record(frequency, **kwargs):
-    logger = logging.getLogger("main")
-    logger.info("start recording frequnecy: %s" % sdr.tools.format_frequnecy(frequency))
-    rate = str(kwargs["rate"])
-    modulation = kwargs["modulation"]
-    ppm_error = str(kwargs["ppm_error"])
-    squelch = str(kwargs["squelch"])
-    dir = kwargs["dir"]
-    min_recording_time = kwargs["min_recording_time"]
-    max_recording_time = kwargs["max_recording_time"]
-    max_silence_time = kwargs["max_silence_time"]
-
-    now = datetime.datetime.now()
-    dir = "%s/%04d-%02d-%02d" % (dir, now.year, now.month, now.day)
-    os.makedirs(dir, exist_ok=True)
-    filename = "%s/%02d_%02d_%02d_%09d.wav" % (dir, now.hour, now.minute, now.second, frequency)
-
-    p1 = subprocess.Popen(
-        ["rtl_fm", "-p", ppm_error, "-g", "0", "-M", modulation, "-f", str(frequency), "-s", rate, "-l", squelch],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.DEVNULL,
-    )
-    p2 = subprocess.Popen(
-        ["sox", "-t", "raw", "-e", "signed", "-c", "1", "-b", "16", "-r", rate, "-", filename],
-        stdin=p1.stdout,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.DEVNULL,
-    )
-
-    time.sleep(max_silence_time)
-    last_size = -1
-    for _ in range(max_recording_time):
-        size = os.path.getsize(filename)
-        if size == last_size:
-            break
-        else:
-            last_size = size
-        time.sleep(max_silence_time)
-
-    logger.info("stop recording frequnecy: %s" % sdr.tools.format_frequnecy(frequency))
-    p1.terminate()
-    p2.terminate()
-    p1.wait()
-    p2.wait()
-
-    with wave.open(filename, "r") as f:
-        frames = f.getnframes()
-        rate = f.getframerate()
-        length = frames / float(rate)
-        logger.info("recording time: %.2f seconds" % length)
-        if length < min_recording_time:
-            os.remove(filename)
-            logger.warning("recording time too short, removing")
-
-
-def scan(**kwargs):
-    logger = logging.getLogger("main")
-    ppm_error = kwargs["ppm_error"]
-    wav_dir = kwargs["wav_dir"]
-    config = kwargs["config"]
-    ignored_ranges_frequencies = kwargs["ignored_ranges_frequencies"]
-    ignored_exact_frequencies = kwargs["ignored_exact_frequencies"]
-    ignored_found_frequencies = kwargs["ignored_found_frequencies"]
-    rate = config["rate"]
-    squelch = config["squelch"]
-    min_recording_time = config["min_recording_time"]
-    max_recording_time = config["max_recording_time"]
-    max_silence_time = config["max_silence_time"]
-
-    for range in config["frequencies_ranges"]:
-        start = range["start"]
-        stop = range["stop"]
-        step = range["step"]
-        minimal_power = range["minimal_power"]
-        integration_interval = range["integration_interval"]
-        modulation = range["modulation"]
-
-        frequency_power = sdr.scanner.get_exact_frequency_power(
-            start=start,
-            stop=stop,
-            step=step,
-            integration_interval=integration_interval,
-            ppm_error=ppm_error,
-            minimal_power=minimal_power,
-            ignored_ranges_frequencies=ignored_ranges_frequencies,
-            ignored_exact_frequencies=ignored_exact_frequencies + ignored_found_frequencies,
-        )
-        frequency_power = sorted(frequency_power, key=lambda d: d[1])
-        if args.log_frequencies > 0:
-            if frequency_power:
-                for (frequency, power) in frequency_power[-args.log_frequencies :]:
-                    logger.debug(sdr.tools.format_frequnecy_power(frequency, power))
-            elif args.show_zero_signal:
-                logger.debug(sdr.tools.format_frequnecy_power(0, 0))
-
-        if frequency_power:
-            (frequency, power) = frequency_power[-1]
-            record(
-                frequency,
-                rate=rate,
-                modulation=modulation,
-                ppm_error=ppm_error,
-                squelch=squelch,
-                dir=wav_dir,
-                min_recording_time=min_recording_time,
-                max_recording_time=max_recording_time,
-                max_silence_time=max_silence_time,
-            )
-
-
-class ApplicationKiller:
-    is_running = True
-
-    def __init__(self):
-        signal.signal(signal.SIGINT, self.exit)
-        signal.signal(signal.SIGTERM, self.exit)
-
-    def exit(self, signum, frame):
-        logger = logging.getLogger("main")
-        logger.warning("stopping application")
-        self.is_running = False
-
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("config", help="path to config file", type=str, metavar="file")
@@ -207,9 +80,7 @@ if __name__ == "__main__":
     config_logger(args.verbose, args.log_directory)
     with open(args.config) as f:
         config = json.load(f)
-
         ppm_error = int(config["ppm_error"])
-
         ignored_ranges_frequencies = config["ignored_frequencies"]["ranges"]
         ignored_exact_frequencies = config["ignored_frequencies"]["exact"]
         ignored_found_frequencies = sdr.scanner.get_ignored_frequencies(
@@ -228,13 +99,15 @@ if __name__ == "__main__":
         print_frequencies_ranges(frequencies_ranges=config["frequencies_ranges"])
         separator("scanning started")
 
-        killer = ApplicationKiller()
+        killer = application_killer.ApplicationKiller()
         while killer.is_running:
-            scan(
+            sdr.scanner.scan(
                 ppm_error=ppm_error,
                 config=config,
                 wav_dir=args.wav_directory,
                 ignored_ranges_frequencies=ignored_ranges_frequencies,
                 ignored_exact_frequencies=ignored_exact_frequencies,
                 ignored_found_frequencies=ignored_found_frequencies,
+                log_frequencies=args.log_frequencies,
+                show_zero_signal=args.show_zero_signal,
             )
