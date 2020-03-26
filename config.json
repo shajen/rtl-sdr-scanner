@@ -41,6 +41,8 @@
   },
   "ppm_error": 31,
   "rate": 48000,
-  "squelch": 50,
-  "timeout": 10
+  "squelch": 10,
+  "min_recording_time": 1,
+  "max_recording_time": 60,
+  "max_silence_time": 1
 }

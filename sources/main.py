@@ -11,6 +11,7 @@ import signal
 import subprocess
 import sys
 import time
+import wave
 
 
 def config_logger(verbose, dir):
@@ -78,7 +79,9 @@ def record(frequency, **kwargs):
     ppm_error = str(kwargs["ppm_error"])
     squelch = str(kwargs["squelch"])
     dir = kwargs["dir"]
-    timeout = kwargs["timeout"]
+    min_recording_time = kwargs["min_recording_time"]
+    max_recording_time = kwargs["max_recording_time"]
+    max_silence_time = kwargs["max_silence_time"]
 
     now = datetime.datetime.now()
     dir = "%s/%04d-%02d-%02d" % (dir, now.year, now.month, now.day)
@@ -97,26 +100,30 @@ def record(frequency, **kwargs):
         stderr=subprocess.DEVNULL,
     )
 
-    factor = 4
-    time.sleep(1 / factor)
-    last_size = 0
-    for _ in range(timeout * factor):
+    time.sleep(max_silence_time)
+    last_size = -1
+    for _ in range(max_recording_time):
         size = os.path.getsize(filename)
         if size == last_size:
             break
         else:
             last_size = size
-        time.sleep(1 / factor)
+        time.sleep(max_silence_time)
 
+    logger.info("stop recording frequnecy: %s" % sdr.tools.format_frequnecy(frequency))
     p1.terminate()
     p2.terminate()
     p1.wait()
     p2.wait()
-    logger.info("stop recording frequnecy: %s" % sdr.tools.format_frequnecy(frequency))
 
-    if size <= 100:
-        os.remove(filename)
-        logger.warning("recording too short, removing")
+    with wave.open(filename, "r") as f:
+        frames = f.getnframes()
+        rate = f.getframerate()
+        length = frames / float(rate)
+        logger.info("recording time: %.2f seconds" % length)
+        if length < min_recording_time:
+            os.remove(filename)
+            logger.warning("recording time too short, removing")
 
 
 def scan(**kwargs):
@@ -129,7 +136,9 @@ def scan(**kwargs):
     ignored_found_frequencies = kwargs["ignored_found_frequencies"]
     rate = config["rate"]
     squelch = config["squelch"]
-    timeout = config["timeout"]
+    min_recording_time = config["min_recording_time"]
+    max_recording_time = config["max_recording_time"]
+    max_silence_time = config["max_silence_time"]
 
     for range in config["frequencies_ranges"]:
         start = range["start"]
@@ -151,13 +160,25 @@ def scan(**kwargs):
         )
         frequency_power = sorted(frequency_power, key=lambda d: d[1])
         if args.log_frequencies > 0:
-            for (frequency, power) in frequency_power[-args.log_frequencies :]:
-                logger.debug(sdr.tools.format_frequnecy_power(frequency, power))
+            if frequency_power:
+                for (frequency, power) in frequency_power[-args.log_frequencies :]:
+                    logger.debug(sdr.tools.format_frequnecy_power(frequency, power))
+            elif args.show_zero_signal:
+                logger.debug(sdr.tools.format_frequnecy_power(0, 0))
+
         if frequency_power:
             (frequency, power) = frequency_power[-1]
-            record(frequency, rate=rate, modulation=modulation, ppm_error=ppm_error, squelch=squelch, dir=wav_dir, timeout=timeout)
-        elif args.show_zero_signal:
-            logger.info(sdr.tools.format_frequnecy_power(0, 0))
+            record(
+                frequency,
+                rate=rate,
+                modulation=modulation,
+                ppm_error=ppm_error,
+                squelch=squelch,
+                dir=wav_dir,
+                min_recording_time=min_recording_time,
+                max_recording_time=max_recording_time,
+                max_silence_time=max_silence_time,
+            )
 
 
 class ApplicationKiller:
