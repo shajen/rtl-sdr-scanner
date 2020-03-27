@@ -2,19 +2,19 @@
   "frequencies_ranges": [
     {
       "start": 144000000,
-      "stop": 146000000,
-      "step": 2500,
+      "stop": 146560000,
+      "step": 1250,
+      "modulation": "fm",
       "minimal_power": 0,
-      "integration_interval": 1,
-      "modulation": "fm"
+      "integration_interval": 1
     },
     {
       "start": 430000000,
-      "stop": 450000000,
-      "step": 2500,
+      "stop": 450480000,
+      "step": 1250,
+      "modulation": "fm",
       "minimal_power": 0,
-      "integration_interval": 1,
-      "modulation": "fm"
+      "integration_interval": 1
     }
   ],
   "ignored_frequencies": {
@@ -25,6 +25,10 @@
     },
     "exact": [],
     "ranges": [
+      [
+        144000000,
+        144010000
+      ],
       [
         432012500,
         432015000
@@ -39,8 +43,9 @@
       ]
     ]
   },
-  "ppm_error": 31,
+  "ppm_error": 0,
   "rate": 48000,
+  "tuner_gain": 0,
   "squelch": 10,
   "min_recording_time": 1,
   "max_recording_time": 60,

@@ -7,7 +7,7 @@ import sdr.tools
 import sdr.recorder
 
 
-def get_nearest_frequency_power(**kwargs):
+def get_frequency_power(**kwargs):
     frequency_power = []
     start = kwargs["start"]
     stop = kwargs["stop"]
@@ -18,7 +18,7 @@ def get_nearest_frequency_power(**kwargs):
 
     try:
         proc = subprocess.Popen(
-            ["rtl_power", "-c", "0.25", "-f", "%s:%s:%s" % (start, stop, step), "-i", str(integration_interval), "-1", "-p", str(ppm_error),],
+            ["rtl_power", "-c", "0", "-f", "%s:%s:%s" % (start, stop, step), "-i", str(integration_interval), "-1", "-p", str(ppm_error),],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
@@ -43,37 +43,25 @@ def get_nearest_frequency_power(**kwargs):
         offset = 0
         _start = int(data[2])
         _stop = int(data[3])
-        _step = float(data[4])
+        _step = int(float(data[4]))
+        if _step != step:
+            logger.error("rtl_power used different step than config! Please fix your range and step frequency in config!")
+            logger.error("%d %d" % (_step, step))
+            exit(1)
         _powers = data[6:]
         for power in _powers:
             frequency_power.append((_start + offset, float(power)))
             offset += _step
-    return frequency_power
 
-
-def get_exact_frequency_power(**kwargs):
-    start = kwargs["start"]
-    step = kwargs["step"]
     ignored_ranges_frequencies = kwargs["ignored_ranges_frequencies"]
     ignored_exact_frequencies = kwargs["ignored_exact_frequencies"]
-    minimal_power = kwargs["minimal_power"]
-
-    nearest_frequency = get_nearest_frequency_power(**kwargs)
-    frequency_power = []
-    frequency = start
-    for ((frequency_left, power_left), (frequency_right, power_right)) in zip(nearest_frequency[::2], nearest_frequency[1::2]):
-        while frequency < frequency_left:
-            frequency += step
-        if (
-            frequency_left <= frequency
-            and frequency <= frequency_right
-            and frequency not in ignored_exact_frequencies
-            and not any([start <= frequency and frequency <= stop for [start, stop] in ignored_ranges_frequencies])
-        ):
-            power = max(power_left, power_right)
-            if minimal_power <= power:
-                frequency_power.append((frequency, power))
-    return frequency_power
+    return list(
+        filter(
+            lambda data: data[0] not in ignored_exact_frequencies
+            and not any([start <= data[0] and data[0] <= stop for [start, stop] in ignored_ranges_frequencies]),
+            frequency_power,
+        )
+    )
 
 
 def get_ignored_frequencies_from_range(**kwargs):
@@ -94,7 +82,7 @@ def get_ignored_frequencies_from_range(**kwargs):
     for i in range(count):
         if i != 0:
             time.sleep(sleep)
-        new_frequencies = set(map(lambda d: d[0], get_exact_frequency_power(**kwargs)))
+        new_frequencies = set(map(lambda d: d[0], get_frequency_power(**kwargs)))
         if mode == "intersection":
             frequencies.intersection_update(new_frequencies)
         else:
@@ -125,7 +113,6 @@ def get_ignored_frequencies(**kwargs):
 
 def scan(**kwargs):
     logger = logging.getLogger("main")
-    ppm_error = kwargs["ppm_error"]
     wav_dir = kwargs["wav_dir"]
     config = kwargs["config"]
     log_frequencies = kwargs["log_frequencies"]
@@ -133,6 +120,8 @@ def scan(**kwargs):
     ignored_ranges_frequencies = kwargs["ignored_ranges_frequencies"]
     ignored_exact_frequencies = kwargs["ignored_exact_frequencies"]
     ignored_found_frequencies = kwargs["ignored_found_frequencies"]
+    ppm_error = config["ppm_error"]
+    tuner_gain = config["tuner_gain"]
     rate = config["rate"]
     squelch = config["squelch"]
     min_recording_time = config["min_recording_time"]
@@ -147,7 +136,7 @@ def scan(**kwargs):
         integration_interval = range["integration_interval"]
         modulation = range["modulation"]
 
-        frequency_power = sdr.scanner.get_exact_frequency_power(
+        frequency_power = sdr.scanner.get_frequency_power(
             start=start,
             stop=stop,
             step=step,
@@ -172,6 +161,7 @@ def scan(**kwargs):
                 rate=rate,
                 modulation=modulation,
                 ppm_error=ppm_error,
+                tuner_gain=tuner_gain,
                 squelch=squelch,
                 dir=wav_dir,
                 min_recording_time=min_recording_time,

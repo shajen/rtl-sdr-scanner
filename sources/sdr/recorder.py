@@ -15,6 +15,7 @@ def record(frequency, **kwargs):
     rate = str(kwargs["rate"])
     modulation = kwargs["modulation"]
     ppm_error = str(kwargs["ppm_error"])
+    tuner_gain = str(kwargs["tuner_gain"])
     squelch = str(kwargs["squelch"])
     dir = kwargs["dir"]
     min_recording_time = kwargs["min_recording_time"]
@@ -27,7 +28,7 @@ def record(frequency, **kwargs):
     filename = "%s/%02d_%02d_%02d_%09d.wav" % (dir, now.hour, now.minute, now.second, frequency)
 
     p1 = subprocess.Popen(
-        ["rtl_fm", "-p", ppm_error, "-g", "0", "-M", modulation, "-f", str(frequency), "-s", rate, "-l", squelch],
+        ["rtl_fm", "-p", ppm_error, "-g", tuner_gain, "-M", modulation, "-f", str(frequency), "-s", rate, "-l", squelch],
         stdout=subprocess.PIPE,
         stderr=subprocess.DEVNULL,
     )

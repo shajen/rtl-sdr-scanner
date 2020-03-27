@@ -102,7 +102,6 @@ if __name__ == "__main__":
         killer = application_killer.ApplicationKiller()
         while killer.is_running:
             sdr.scanner.scan(
-                ppm_error=ppm_error,
                 config=config,
                 wav_dir=args.wav_directory,
                 ignored_ranges_frequencies=ignored_ranges_frequencies,
