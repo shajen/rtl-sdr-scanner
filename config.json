@@ -2,52 +2,32 @@
   "frequencies_ranges": [
     {
       "start": 144000000,
-      "stop": 146560000,
-      "step": 1250,
-      "modulation": "fm",
-      "minimal_power": 0,
-      "integration_interval": 1
+      "stop": 146000000,
+      "modulation": "fm"
     },
     {
-      "start": 430000000,
-      "stop": 450480000,
-      "step": 1250,
-      "modulation": "fm",
-      "minimal_power": 0,
-      "integration_interval": 1
+      "start": 446000000,
+      "stop": 448000000,
+      "modulation": "fm"
     }
   ],
   "ignored_frequencies": {
-    "scan": {
-      "count": 0,
-      "sleep": 3,
-      "mode": "union"
-    },
     "exact": [],
-    "ranges": [
-      [
-        144000000,
-        144010000
-      ],
-      [
-        432012500,
-        432015000
-      ],
-      [
-        438490000,
-        438500000
-      ],
-      [
-        448002500,
-        448017500
-      ]
-    ]
+    "ranges": []
   },
-  "ppm_error": 0,
-  "rate": 48000,
-  "tuner_gain": 0,
-  "squelch": 10,
-  "min_recording_time": 1,
-  "max_recording_time": 60,
-  "max_silence_time": 1
+  "device": {
+    "ppm_error": 0,
+    "tuner_gain": 0
+  },
+  "scanning": {
+    "noise_level": -5,
+    "samples": 102400,
+    "fft": 262144
+  },
+  "recording": {
+    "squelch": 5,
+    "min_recording_time": 1,
+    "max_recording_time": 60,
+    "max_silence_time": 1
+  }
 }
