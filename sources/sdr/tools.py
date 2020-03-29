@@ -21,7 +21,7 @@ def format_frequnecy(frequency):
 
 
 def format_frequnecy_power(frequency, power):
-    return "frequnecy: %14s, power: %5.2f dB %s" % (format_frequnecy(frequency), power, format_power(power))
+    return "frequnecy: %14s, power: %6.2f dB %s" % (format_frequnecy(frequency), power, format_power(power))
 
 
 def format_frequnecies(frequencies):

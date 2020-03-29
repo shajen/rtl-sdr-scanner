@@ -29,11 +29,11 @@ def config_logger(verbose, dir):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("config", help="path to config file", type=str, metavar="file")
-    parser.add_argument("-lf", "--log_frequencies", help="print n best signals per range", type=int, default=3, metavar="n")
     parser.add_argument("-ld", "--log_directory", help="store output log in directory", type=str, metavar="dir")
     parser.add_argument("-wd", "--wav_directory", help="store output wav in directory", type=str, metavar="dir", default="wav")
     parser.add_argument("-dr", "--disable_recording", help="disable recording, only scannig", action="store_true")
-    parser.add_argument("-dbf", "--disable_best_frequency", help="disable printing best frequency if not found any better", action="store_true")
+    parser.add_argument("-pbf", "--print_best_frequencies", help="print n best frequencies", type=int, default=1, metavar="n")
+    parser.add_argument("-fbf", "--filter_best_frequencies", help="filter printed n best frequencies", action="store_true")
     parser.add_argument("-v", "--verbose", action="count", default=0)
     args = parser.parse_args()
 
@@ -47,14 +47,13 @@ if __name__ == "__main__":
             tuner_gain=config["device"]["tuner_gain"],
             squelch=config["recording"]["squelch"],
             bandwidth=config["scanning"]["bandwidth"],
-            noise_level=config["scanning"]["noise_level"],
             samples=config["scanning"]["samples"],
             fft=config["scanning"]["fft"],
             min_recording_time=config["recording"]["min_recording_time"],
             max_recording_time=config["recording"]["max_recording_time"],
             max_silence_time=config["recording"]["max_silence_time"],
-            disable_best_frequency=args.disable_best_frequency,
-            log_frequencies=args.log_frequencies,
             wav_directory=args.wav_directory,
             disable_recording=args.disable_recording,
+            print_best_frequencies=args.print_best_frequencies,
+            filter_best_frequencies=args.filter_best_frequencies,
         )

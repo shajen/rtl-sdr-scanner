@@ -23,7 +23,6 @@
   },
   "scanning": {
     "bandwidth": 2000000,
-    "noise_level": -7,
     "samples": 10240,
     "fft": 16384
   },
