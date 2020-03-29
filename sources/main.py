@@ -33,7 +33,7 @@ if __name__ == "__main__":
     parser.add_argument("-ld", "--log_directory", help="store output log in directory", type=str, metavar="dir")
     parser.add_argument("-wd", "--wav_directory", help="store output wav in directory", type=str, metavar="dir", default="wav")
     parser.add_argument("-dr", "--disable_recording", help="disable recording, only scannig", action="store_true")
-    parser.add_argument("-z", "--show_zero_signal", help="print zero signal if not found any better", action="store_true")
+    parser.add_argument("-dbf", "--disable_best_frequency", help="disable printing best frequency if not found any better", action="store_true")
     parser.add_argument("-v", "--verbose", action="count", default=0)
     args = parser.parse_args()
 
@@ -53,7 +53,7 @@ if __name__ == "__main__":
             min_recording_time=config["recording"]["min_recording_time"],
             max_recording_time=config["recording"]["max_recording_time"],
             max_silence_time=config["recording"]["max_silence_time"],
-            show_zero_signal=args.show_zero_signal,
+            disable_best_frequency=args.disable_best_frequency,
             log_frequencies=args.log_frequencies,
             wav_directory=args.wav_directory,
             disable_recording=args.disable_recording,

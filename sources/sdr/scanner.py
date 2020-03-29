@@ -33,18 +33,25 @@ def __detect_best_signal(frequencies, powers, **kwargs):
 def __scan(device, **kwargs):
     logger = logging.getLogger("sdr")
     log_frequencies = kwargs["log_frequencies"]
-    show_zero_signal = kwargs["show_zero_signal"]
+    disable_best_frequency = kwargs["disable_best_frequency"]
     bandwidth = kwargs["bandwidth"]
     disable_recording = kwargs["disable_recording"]
     noise_level = kwargs["noise_level"]
 
     printed_any_frequency = False
+    best_frequency = 0
+    best_power = -100
     for _range in kwargs["frequencies_ranges"]:
         start = _range["start"]
         stop = _range["stop"]
         for substart in range(start, stop, bandwidth):
             frequencies, powers = __get_frequency_power(device, substart, substart + bandwidth, **kwargs)
             (frequency, width) = __detect_best_signal(frequencies, powers, **kwargs)
+
+            best_signal = np.argmax(powers)
+            if best_power <= powers[best_signal]:
+                best_frequency = int(frequencies[best_signal])
+                best_power = float(powers[best_signal])
 
             if frequency:
                 if not disable_recording:
@@ -56,8 +63,8 @@ def __scan(device, **kwargs):
                         printed_any_frequency = True
                         logger.debug(sdr.tools.format_frequnecy_power(int(frequencies[i]), float(powers[i])))
 
-    if show_zero_signal and not printed_any_frequency:
-        logger.debug(sdr.tools.format_frequnecy_power(0, 0))
+    if not disable_best_frequency and not printed_any_frequency:
+        logger.debug(sdr.tools.format_frequnecy_power(best_frequency, best_power))
 
 
 def __filter_ranges(**kwargs):

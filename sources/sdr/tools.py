@@ -53,7 +53,7 @@ def format_bar(value, **kwargs):
 
 
 def format_power(value):
-    return format_bar(value, min=0, max=20, length=40)
+    return format_bar(value, min=-10, max=0, length=40)
 
 
 def separator(label, **kwargs):
