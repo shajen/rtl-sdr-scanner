@@ -11,16 +11,21 @@
       "modulation": "fm"
     }
   ],
-  "ignored_frequencies_ranges": [],
+  "ignored_frequencies_ranges": [
+    {
+      "start": 439000000,
+      "stop": 439010000
+    }
+  ],
   "device": {
     "ppm_error": 0,
     "tuner_gain": 0
   },
   "scanning": {
     "bandwidth": 2000000,
-    "noise_level": -5,
-    "samples": 102400,
-    "fft": 262144
+    "noise_level": -7,
+    "samples": 10240,
+    "fft": 16384
   },
   "recording": {
     "squelch": 5,

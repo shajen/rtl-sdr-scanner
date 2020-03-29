@@ -21,13 +21,14 @@ def __get_frequency_power(device, start, stop, **kwargs):
     return frequencies + device.center_freq, np.log10(powers)
 
 
-def __detect_best_signal(frequencies, powers, **kwargs):
+def __detect_best_signal(frequencies, powers, sorted_frequencies_indexes, **kwargs):
     noise_level = kwargs["noise_level"]
+    ignored_frequencies_ranges = kwargs["ignored_frequencies_ranges"]
 
-    i = np.argmax(powers)
-    if noise_level <= powers[i]:
-        return (int(frequencies[i]), 25000)
-    return (None, None)
+    for i in sorted_frequencies_indexes:
+        if not any(_range["start"] <= frequencies[i] and frequencies[i] <= _range["stop"] for _range in ignored_frequencies_ranges):
+            return (int(frequencies[i]), float(powers[i]), 25000, noise_level <= powers[i])
+    return (0, -100.0, 0, False)
 
 
 def __scan(device, **kwargs):
@@ -37,31 +38,32 @@ def __scan(device, **kwargs):
     bandwidth = kwargs["bandwidth"]
     disable_recording = kwargs["disable_recording"]
     noise_level = kwargs["noise_level"]
+    ignored_frequencies_ranges = kwargs["ignored_frequencies_ranges"]
 
     printed_any_frequency = False
     best_frequency = 0
-    best_power = -100
+    best_power = -100.0
     for _range in kwargs["frequencies_ranges"]:
         start = _range["start"]
         stop = _range["stop"]
         for substart in range(start, stop, bandwidth):
             frequencies, powers = __get_frequency_power(device, substart, substart + bandwidth, **kwargs)
-            (frequency, width) = __detect_best_signal(frequencies, powers, **kwargs)
+            sorted_frequencies_indexes = np.argsort(powers)[::-1]
+            (frequency, power, width, recording) = __detect_best_signal(frequencies, powers, sorted_frequencies_indexes, **kwargs)
 
-            best_signal = np.argmax(powers)
-            if best_power <= powers[best_signal]:
-                best_frequency = int(frequencies[best_signal])
-                best_power = float(powers[best_signal])
+            if recording and not disable_recording:
+                sdr.recorder.record(device, frequency, width, _range, **kwargs)
 
-            if frequency:
-                if not disable_recording:
-                    sdr.recorder.record(device, frequency, width, _range, **kwargs)
+            if best_power < power:
+                best_frequency = frequency
+                best_power = power
 
-                best_frequencies = np.argsort(powers)
-                for i in best_frequencies[-log_frequencies:]:
-                    if noise_level <= powers[i]:
-                        printed_any_frequency = True
-                        logger.debug(sdr.tools.format_frequnecy_power(int(frequencies[i]), float(powers[i])))
+            for i in sorted_frequencies_indexes[:log_frequencies][::-1]:
+                if noise_level <= powers[i]:
+                    printed_any_frequency = True
+                    logger.debug(sdr.tools.format_frequnecy_power(int(frequencies[i]), float(powers[i])))
+                else:
+                    break
 
     if not disable_best_frequency and not printed_any_frequency:
         logger.debug(sdr.tools.format_frequnecy_power(best_frequency, best_power))
