@@ -6,20 +6,18 @@
       "modulation": "fm"
     },
     {
-      "start": 446000000,
-      "stop": 448000000,
+      "start": 430000000,
+      "stop": 450000000,
       "modulation": "fm"
     }
   ],
-  "ignored_frequencies": {
-    "exact": [],
-    "ranges": []
-  },
+  "ignored_frequencies_ranges": [],
   "device": {
     "ppm_error": 0,
     "tuner_gain": 0
   },
   "scanning": {
+    "bandwidth": 2000000,
     "noise_level": -5,
     "samples": 102400,
     "fft": 262144

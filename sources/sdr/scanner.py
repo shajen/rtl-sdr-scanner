@@ -12,53 +12,61 @@ import sdr.recorder
 import sdr.tools
 
 
-def __get_frequency_power(device, config, **kwargs):
-    start = config["start"]
-    stop = config["stop"]
+def __get_frequency_power(device, start, stop, **kwargs):
     samples = kwargs["samples"]
     fft = kwargs["fft"]
 
-    device.sample_rate = stop - start
     device.center_freq = int((start + stop) / 2)
     [powers, frequencies] = matplotlib.mlab.psd(device.read_samples(samples), NFFT=fft, Fs=device.sample_rate)
     return frequencies + device.center_freq, np.log10(powers)
+
+
+def __detect_best_signal(frequencies, powers, **kwargs):
+    noise_level = kwargs["noise_level"]
+
+    i = np.argmax(powers)
+    if noise_level <= powers[i]:
+        return (frequencies[i], 25000)
+    return (None, None)
 
 
 def __scan(device, **kwargs):
     logger = logging.getLogger("sdr")
     log_frequencies = kwargs["log_frequencies"]
     show_zero_signal = kwargs["show_zero_signal"]
-    noise_level = kwargs["noise_level"]
+    bandwidth = kwargs["bandwidth"]
     disable_recording = kwargs["disable_recording"]
+    noise_level = kwargs["noise_level"]
 
+    printed_any_frequency = False
     for _config in kwargs["frequencies_ranges"]:
-        frequencies, powers = __get_frequency_power(device, _config, **kwargs)
-        best_frequencies = np.argsort(powers)
-        for i in best_frequencies[-log_frequencies:]:
-            if noise_level <= powers[i]:
-                logger.debug(sdr.tools.format_frequnecy_power(int(frequencies[i]), float(powers[i])))
-        if show_zero_signal:
-            logger.debug(sdr.tools.format_frequnecy_power(0, 0))
+        for start in range(_config["start"], _config["stop"], bandwidth):
+            frequencies, powers = __get_frequency_power(device, start, start + bandwidth, **kwargs)
+            (frequency, width) = __detect_best_signal(frequencies, powers, **kwargs)
 
-        if not disable_recording:
-            frequency = int(frequencies[best_frequencies[-1]])
-            power = int(powers[best_frequencies[-1]])
-            if noise_level <= power:
-                sdr.recorder.record(device, frequency, 25000, _config, **kwargs)
+            if frequency:
+                if not disable_recording:
+                    sdr.recorder.record(device, frequency, width, _config, **kwargs)
+
+                best_frequencies = np.argsort(powers)
+                for i in best_frequencies[-log_frequencies:]:
+                    if noise_level <= powers[i]:
+                        printed_any_frequency = True
+                        logger.debug(sdr.tools.format_frequnecy_power(int(frequencies[i]), float(powers[i])))
+
+    if show_zero_signal and not printed_any_frequency:
+        logger.debug(sdr.tools.format_frequnecy_power(0, 0))
 
 
 def run(**kwargs):
-    sdr.tools.print_ignored_frequencies(
-        ignored_ranges_frequencies=kwargs["ignored_ranges_frequencies"],
-        ignored_exact_frequencies=kwargs["ignored_ranges_frequencies"],
-        ignored_found_frequencies=[],
-    )
-    sdr.tools.print_frequencies_ranges(frequencies_ranges=kwargs["frequencies_ranges"])
+    sdr.tools.print_ignored_frequencies(kwargs["ignored_frequencies_ranges"])
+    sdr.tools.print_frequencies_ranges(kwargs["frequencies_ranges"])
     sdr.tools.separator("scanning started")
 
     device = rtlsdr.RtlSdr()
     device.ppm_error = kwargs["ppm_error"]
     device.gain = kwargs["tuner_gain"]
+    device.sample_rate = kwargs["bandwidth"]
 
     killer = application_killer.ApplicationKiller()
     while killer.is_running:

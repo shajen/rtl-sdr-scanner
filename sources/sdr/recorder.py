@@ -59,6 +59,7 @@ def record(device, frequency, bandwidth, config, **kwargs):
     device.open()
     device.ppm_error = kwargs["ppm_error"]
     device.gain = kwargs["tuner_gain"]
+    device.sample_rate = kwargs["bandwidth"]
 
     with wave.open(filename, "r") as f:
         frames = f.getnframes()

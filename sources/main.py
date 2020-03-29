@@ -42,11 +42,11 @@ if __name__ == "__main__":
         config = json.load(f)
         sdr.scanner.run(
             frequencies_ranges=config["frequencies_ranges"],
-            ignored_ranges_frequencies=config["ignored_frequencies"]["ranges"],
-            ignored_exact_frequencies=config["ignored_frequencies"]["exact"],
+            ignored_frequencies_ranges=config["ignored_frequencies_ranges"],
             ppm_error=int(config["device"]["ppm_error"]),
             tuner_gain=config["device"]["tuner_gain"],
             squelch=config["recording"]["squelch"],
+            bandwidth=config["scanning"]["bandwidth"],
             noise_level=config["scanning"]["noise_level"],
             samples=config["scanning"]["samples"],
             fft=config["scanning"]["fft"],
