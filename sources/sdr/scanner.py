@@ -26,7 +26,7 @@ def __detect_best_signal(frequencies, powers, **kwargs):
 
     i = np.argmax(powers)
     if noise_level <= powers[i]:
-        return (frequencies[i], 25000)
+        return (int(frequencies[i]), 25000)
     return (None, None)
 
 

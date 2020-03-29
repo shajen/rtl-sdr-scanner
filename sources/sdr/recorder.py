@@ -9,7 +9,7 @@ import time
 import wave
 
 
-def record(device, frequency, bandwidth, config, **kwargs):
+def record(device, frequency, width, config, **kwargs):
     logger = logging.getLogger("sdr")
     logger.info("start recording frequnecy: %s" % sdr.tools.format_frequnecy(frequency))
     ppm_error = str(kwargs["ppm_error"])
@@ -19,7 +19,7 @@ def record(device, frequency, bandwidth, config, **kwargs):
     min_recording_time = kwargs["min_recording_time"]
     max_recording_time = kwargs["max_recording_time"]
     max_silence_time = kwargs["max_silence_time"]
-    bandwidth = str(bandwidth)
+    width = str(width)
     modulation = config["modulation"]
 
     now = datetime.datetime.now()
@@ -29,12 +29,12 @@ def record(device, frequency, bandwidth, config, **kwargs):
 
     device.close()
     p1 = subprocess.Popen(
-        ["rtl_fm", "-p", ppm_error, "-g", tuner_gain, "-M", modulation, "-f", str(frequency), "-s", bandwidth, "-l", squelch],
+        ["rtl_fm", "-p", ppm_error, "-g", tuner_gain, "-M", modulation, "-f", str(frequency), "-s", width, "-l", squelch],
         stdout=subprocess.PIPE,
         stderr=subprocess.DEVNULL,
     )
     p2 = subprocess.Popen(
-        ["sox", "-t", "raw", "-e", "signed", "-c", "1", "-b", "16", "-r", bandwidth, "-", filename],
+        ["sox", "-t", "raw", "-e", "signed", "-c", "1", "-b", "16", "-r", width, "-", filename],
         stdin=p1.stdout,
         stdout=subprocess.PIPE,
         stderr=subprocess.DEVNULL,
@@ -56,11 +56,6 @@ def record(device, frequency, bandwidth, config, **kwargs):
     p1.wait()
     p2.wait()
 
-    device.open()
-    device.ppm_error = kwargs["ppm_error"]
-    device.gain = kwargs["tuner_gain"]
-    device.sample_rate = kwargs["bandwidth"]
-
     with wave.open(filename, "r") as f:
         frames = f.getnframes()
         rate = f.getframerate()
@@ -69,3 +64,8 @@ def record(device, frequency, bandwidth, config, **kwargs):
         if length < min_recording_time:
             os.remove(filename)
             logger.warning("recording time too short, removing")
+
+    device.open()
+    device.ppm_error = kwargs["ppm_error"]
+    device.gain = kwargs["tuner_gain"]
+    device.sample_rate = kwargs["bandwidth"]
