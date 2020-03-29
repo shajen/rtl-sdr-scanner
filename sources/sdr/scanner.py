@@ -39,14 +39,16 @@ def __scan(device, **kwargs):
     noise_level = kwargs["noise_level"]
 
     printed_any_frequency = False
-    for _config in kwargs["frequencies_ranges"]:
-        for start in range(_config["start"], _config["stop"], bandwidth):
-            frequencies, powers = __get_frequency_power(device, start, start + bandwidth, **kwargs)
+    for _range in kwargs["frequencies_ranges"]:
+        start = _range["start"]
+        stop = _range["stop"]
+        for substart in range(start, stop, bandwidth):
+            frequencies, powers = __get_frequency_power(device, substart, substart + bandwidth, **kwargs)
             (frequency, width) = __detect_best_signal(frequencies, powers, **kwargs)
 
             if frequency:
                 if not disable_recording:
-                    sdr.recorder.record(device, frequency, width, _config, **kwargs)
+                    sdr.recorder.record(device, frequency, width, _range, **kwargs)
 
                 best_frequencies = np.argsort(powers)
                 for i in best_frequencies[-log_frequencies:]:
@@ -58,10 +60,32 @@ def __scan(device, **kwargs):
         logger.debug(sdr.tools.format_frequnecy_power(0, 0))
 
 
+def __filter_ranges(**kwargs):
+    ranges = []
+    logger = logging.getLogger("sdr")
+    bandwidth = kwargs["bandwidth"]
+    for _range in kwargs["frequencies_ranges"]:
+        start = _range["start"]
+        stop = _range["stop"]
+        if (stop - start) % bandwidth != 0:
+            logger.warning(
+                "frequency range: %s error! range not fit to bandwidth: %s! skipping!"
+                % (sdr.tools.format_frequnecy_range(start, stop), sdr.tools.format_frequnecy(bandwidth))
+            )
+        else:
+            ranges.append(_range)
+    if ranges:
+        return ranges
+    else:
+        logger.error("empty frequency ranges! quitting!")
+        exit(1)
+
+
 def run(**kwargs):
     sdr.tools.print_ignored_frequencies(kwargs["ignored_frequencies_ranges"])
     sdr.tools.print_frequencies_ranges(kwargs["frequencies_ranges"])
     sdr.tools.separator("scanning started")
+    kwargs["frequencies_ranges"] = __filter_ranges(**kwargs)
 
     device = rtlsdr.RtlSdr()
     device.ppm_error = kwargs["ppm_error"]
