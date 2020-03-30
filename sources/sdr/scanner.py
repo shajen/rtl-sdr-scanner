@@ -21,16 +21,38 @@ def __get_frequency_power(device, start, stop, **kwargs):
     return frequencies + device.center_freq, np.log10(powers)
 
 
-def __detect_best_signal(frequencies, powers, sorted_frequencies_indexes, **kwargs):
+def __is_frequency_ok(frequency, **kwargs):
+    ignored_frequencies_ranges = kwargs["ignored_frequencies_ranges"]
+    return not any(_range["start"] <= frequency and frequency <= _range["stop"] for _range in ignored_frequencies_ranges)
+
+
+def __filter_frequencies(frequencies, powers, **kwargs):
+    print_best_frequencies = max(1, kwargs["print_best_frequencies"])
+    sorted_frequencies_indexes = np.argsort(powers)[::-1]
+
+    indexes = []
+    total = 0
+    for i in sorted_frequencies_indexes:
+        if __is_frequency_ok(int(frequencies[i]), **kwargs):
+            indexes.append(i)
+            total += 1
+        if print_best_frequencies <= total:
+            break
+    return frequencies[indexes], powers[indexes]
+
+
+def __detect_best_signal(frequencies, powers, filtered_frequencies, filtered_powers, **kwargs):
     try:
         noise_level = int(kwargs["noise_level"])
     except ValueError:
-        noise_level = powers[len(powers) // 2]
+        i = np.argmax(filtered_powers)
+        if abs(filtered_frequencies[i] - frequencies[len(frequencies) // 2]) <= 1000:
+            noise_level = filtered_powers[i]
+        else:
+            noise_level = -100
 
-    ignored_frequencies_ranges = kwargs["ignored_frequencies_ranges"]
-    for i in sorted_frequencies_indexes:
-        if not any(_range["start"] <= frequencies[i] and frequencies[i] <= _range["stop"] for _range in ignored_frequencies_ranges):
-            return (int(frequencies[i]), float(powers[i]), 12500, noise_level < powers[i])
+    for i in range(len(filtered_frequencies)):
+        return (int(filtered_frequencies[i]), float(filtered_powers[i]), 12500, noise_level < filtered_powers[i])
 
     return (0, -100.0, 0, False)
 
@@ -51,37 +73,27 @@ def __scan(device, **kwargs):
         stop = _range["stop"]
         for substart in range(start, stop, bandwidth):
             frequencies, powers = __get_frequency_power(device, substart, substart + bandwidth, **kwargs)
-            sorted_frequencies_indexes = np.argsort(powers)[::-1]
-            (frequency, _, width, _recording) = __detect_best_signal(frequencies, powers, sorted_frequencies_indexes, **kwargs)
+            filtered_frequencies, filtered_powers = __filter_frequencies(frequencies, powers, **kwargs)
+            (frequency, _, width, _recording) = __detect_best_signal(frequencies, powers, filtered_frequencies, filtered_powers, **kwargs)
 
             recording = recording or _recording
-            best_frequencies = np.concatenate((best_frequencies, frequencies[sorted_frequencies_indexes[:print_best_frequencies]]))
-            best_powers = np.concatenate((best_powers, powers[sorted_frequencies_indexes[:print_best_frequencies]]))
+            best_frequencies = np.concatenate((best_frequencies, filtered_frequencies))
+            best_powers = np.concatenate((best_powers, filtered_powers))
 
             if _recording and not disable_recording:
                 sdr.recorder.record(device, frequency, width, _range, **kwargs)
 
-    try:
-        noise_level = int(kwargs["noise_level"])
-        if not filter_best_frequencies:
-            noise_level = -100
-    except ValueError:
-        if filter_best_frequencies and not recording:
-            noise_level = 100
-        else:
-            noise_level = -100
-    indexes = np.argsort(best_powers)[::-1][:print_best_frequencies]
-    best_frequencies = best_frequencies[indexes]
-    best_powers = best_powers[indexes]
-    should_print_separator = noise_level <= best_powers[0] and 1 < print_best_frequencies
-    indexes = np.argsort(best_frequencies)
-    best_frequencies = best_frequencies[indexes]
-    best_powers = best_powers[indexes]
-    for i in range(len(best_frequencies)):
-        if noise_level < best_powers[i]:
+    if recording or not filter_best_frequencies:
+        indexes = np.argsort(best_powers)[::-1][:print_best_frequencies]
+        best_frequencies = best_frequencies[indexes]
+        best_powers = best_powers[indexes]
+        indexes = np.argsort(best_frequencies)
+        best_frequencies = best_frequencies[indexes]
+        best_powers = best_powers[indexes]
+        for i in range(len(best_frequencies)):
             logger.debug(sdr.tools.format_frequnecy_power(int(best_frequencies[i]), float(best_powers[i])))
-    if should_print_separator:
-        logger.debug("-" * 80)
+        if 1 < print_best_frequencies:
+            logger.debug("-" * 80)
 
 
 def __filter_ranges(**kwargs):

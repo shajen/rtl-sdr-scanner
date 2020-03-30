@@ -13,6 +13,10 @@
   ],
   "ignored_frequencies_ranges": [
     {
+      "start": 438470000,
+      "stop": 438490000
+    },
+    {
       "start": 439000000,
       "stop": 439010000
     }
