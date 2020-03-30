@@ -22,6 +22,7 @@
     "tuner_gain": 0
   },
   "scanning": {
+    "noise_level": "auto",
     "bandwidth": 2000000,
     "samples": 10240,
     "fft": 16384

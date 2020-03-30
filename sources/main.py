@@ -46,6 +46,7 @@ if __name__ == "__main__":
             ppm_error=int(config["device"]["ppm_error"]),
             tuner_gain=config["device"]["tuner_gain"],
             squelch=config["recording"]["squelch"],
+            noise_level=config["scanning"]["noise_level"],
             bandwidth=config["scanning"]["bandwidth"],
             samples=config["scanning"]["samples"],
             fft=config["scanning"]["fft"],
