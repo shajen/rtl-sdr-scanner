@@ -9,9 +9,9 @@ import time
 import wave
 
 
-def record(device, frequency, width, config, **kwargs):
+def record(device, frequency, power, width, config, **kwargs):
     logger = logging.getLogger("sdr")
-    logger.info("start recording frequnecy: %s" % sdr.tools.format_frequnecy(frequency))
+    logger.info("start recording %s" % sdr.tools.format_frequnecy_power(frequency, power))
     ppm_error = str(kwargs["ppm_error"])
     tuner_gain = str(kwargs["tuner_gain"])
     squelch = str(kwargs["squelch"])
