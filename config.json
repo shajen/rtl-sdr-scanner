@@ -1,17 +1,45 @@
 {
   "frequencies_ranges": [
     {
+      "start": 26000000,
+      "stop": 28000000,
+      "modulation": "am"
+    },
+    {
+      "start": 28000000,
+      "stop": 30000000,
+      "modulation": "fm"
+    },
+    {
+      "start": 50000000,
+      "stop": 52000000,
+      "modulation": "fm"
+    },
+    {
+      "start": 108000000,
+      "stop": 144000000,
+      "modulation": "am"
+    },
+    {
       "start": 144000000,
       "stop": 146000000,
       "modulation": "fm"
     },
     {
       "start": 430000000,
-      "stop": 450000000,
+      "stop": 440000000,
       "modulation": "fm"
     }
   ],
   "ignored_frequencies_ranges": [
+    {
+      "start": 28799000,
+      "stop": 28801000
+    },
+    {
+      "start": 115199000,
+      "stop": 115201000
+    },
     {
       "start": 438470000,
       "stop": 438490000
@@ -26,7 +54,7 @@
     "tuner_gain": 0
   },
   "scanning": {
-    "noise_level": "auto",
+    "noise_level": -7.9,
     "bandwidth": 2000000,
     "samples": 10240,
     "fft": 16384
