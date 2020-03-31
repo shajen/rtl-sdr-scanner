@@ -15,7 +15,53 @@ Run below commands in terminal to get help:
 ```
 ./sources/main.py --help
 ```
-
+## Example
+```
+shajen@artemida:~/git/auto-sdr $ sources/main.py config.json -vvv -pbf 10 -fbf
+[2020-03-31 13:35:23][   INFO][   sdr] 
+[2020-03-31 13:35:23][   INFO][   sdr] ################################################################################
+[2020-03-31 13:35:23][   INFO][   sdr] ############################# IGNORED FREQUENCIES ##############################
+[2020-03-31 13:35:23][   INFO][   sdr] ################################################################################
+[2020-03-31 13:35:23][   INFO][   sdr] ignored frequency range user defined: 28,799,000 Hz - 28,801,000 Hz
+[2020-03-31 13:35:23][   INFO][   sdr] ignored frequency range user defined: 115,199,000 Hz - 115,201,000 Hz
+[2020-03-31 13:35:23][   INFO][   sdr] ignored frequency range user defined: 438,470,000 Hz - 438,490,000 Hz
+[2020-03-31 13:35:23][   INFO][   sdr] ignored frequency range user defined: 439,000,000 Hz - 439,010,000 Hz
+[2020-03-31 13:35:23][   INFO][   sdr] 
+[2020-03-31 13:35:23][   INFO][   sdr] ################################################################################
+[2020-03-31 13:35:23][   INFO][   sdr] ############################### SCANNING RANGES ################################
+[2020-03-31 13:35:23][   INFO][   sdr] ################################################################################
+[2020-03-31 13:35:23][   INFO][   sdr] scanned frequency range: 26,000,000 Hz - 28,000,000 Hz
+[2020-03-31 13:35:23][   INFO][   sdr] scanned frequency range: 28,000,000 Hz - 30,000,000 Hz
+[2020-03-31 13:35:23][   INFO][   sdr] scanned frequency range: 50,000,000 Hz - 52,000,000 Hz
+[2020-03-31 13:35:23][   INFO][   sdr] scanned frequency range: 108,000,000 Hz - 144,000,000 Hz
+[2020-03-31 13:35:23][   INFO][   sdr] scanned frequency range: 144,000,000 Hz - 146,000,000 Hz
+[2020-03-31 13:35:23][   INFO][   sdr] scanned frequency range: 430,000,000 Hz - 440,000,000 Hz
+[2020-03-31 13:35:23][   INFO][   sdr] 
+[2020-03-31 13:35:23][   INFO][   sdr] ################################################################################
+[2020-03-31 13:35:23][   INFO][   sdr] ############################### SCANNING STARTED ###############################
+[2020-03-31 13:35:23][   INFO][   sdr] ################################################################################
+Found Rafael Micro R820T tuner
+[R82XX] PLL not locked!
+Exact sample rate is: 2000000.052982 Hz
+[2020-03-31 13:35:30][   INFO][   sdr] start recording frequnecy: 144,498,046 Hz, power:  -4.16 dB #######################_________________
+[2020-03-31 13:35:41][   INFO][   sdr] stop recording frequnecy: 144,498,046 Hz
+[2020-03-31 13:35:42][   INFO][   sdr] recording time: 8.52 seconds
+Found Rafael Micro R820T tuner
+[R82XX] PLL not locked!
+Exact sample rate is: 2000000.052982 Hz
+[2020-03-31 13:35:43][  DEBUG][   sdr] frequnecy: 144,431,640 Hz, power:  -6.29 dB ###############_________________________
+[2020-03-31 13:35:43][  DEBUG][   sdr] frequnecy: 144,497,558 Hz, power:  -6.33 dB ###############_________________________
+[2020-03-31 13:35:43][  DEBUG][   sdr] frequnecy: 144,497,680 Hz, power:  -5.98 dB ################________________________
+[2020-03-31 13:35:43][  DEBUG][   sdr] frequnecy: 144,497,802 Hz, power:  -5.80 dB #################_______________________
+[2020-03-31 13:35:43][  DEBUG][   sdr] frequnecy: 144,497,924 Hz, power:  -4.76 dB #####################___________________
+[2020-03-31 13:35:43][  DEBUG][   sdr] frequnecy: 144,498,046 Hz, power:  -4.16 dB #######################_________________
+[2020-03-31 13:35:43][  DEBUG][   sdr] frequnecy: 144,498,168 Hz, power:  -4.17 dB #######################_________________
+[2020-03-31 13:35:43][  DEBUG][   sdr] frequnecy: 144,498,291 Hz, power:  -4.77 dB #####################___________________
+[2020-03-31 13:35:43][  DEBUG][   sdr] frequnecy: 144,498,413 Hz, power:  -5.83 dB #################_______________________
+[2020-03-31 13:35:43][  DEBUG][   sdr] frequnecy: 144,498,535 Hz, power:  -6.01 dB ################________________________
+[2020-03-31 13:35:43][  DEBUG][   sdr] --------------------------------------------------------------------------------
+^C[2020-03-31 13:36:06][WARNING][killer] stopping application
+```
 ## Contributing
 
 In general don't be afraid to send pull request. Use the "fork-and-pull" Git workflow.
