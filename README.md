@@ -62,6 +62,9 @@ Exact sample rate is: 2000000.052982 Hz
 [2020-03-31 13:35:43][  DEBUG][   sdr] --------------------------------------------------------------------------------
 ^C[2020-03-31 13:36:06][WARNING][killer] stopping application
 ```
+
+All recorded frequencies are stored in `wav` directory.
+
 ## Contributing
 
 In general don't be afraid to send pull request. Use the "fork-and-pull" Git workflow.
