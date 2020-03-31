@@ -6,7 +6,7 @@ This project contains my rtl-sdr script written in python3 to scan and record in
 
 Edit your configuration in file:
 ```
-./config.json
+config.json
 ```
 
 ## Run
@@ -32,7 +32,7 @@ NOTE: Be sure to merge the **latest** from **upstream** before making a pull req
 
 If you enjoy this project and want to thanks, please use follow link:
 
-[![Support via PayPal](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=shajen@shajen.pl&lc=US&item_name=rtl+sdr+scanner&no_note=0&cn=&curency_code=USD)
+[![Support via PayPal](https://www.paypalobjects.com/webstatic/en_US/i/buttons/pp-acceptance-medium.png)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=shajen@shajen.pl&lc=US&item_name=rtl+sdr+scanner&no_note=0&cn=&curency_code=USD)
 
 ## License
 
