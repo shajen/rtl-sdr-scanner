@@ -24,10 +24,7 @@ pip3 install --user -r requirements.txt
 
 ## Configuration
 
-Edit your configuration in file:
-```
-config.json
-```
+Edit your configuration in file [config.json](config.json).
 
 ## Run
 
