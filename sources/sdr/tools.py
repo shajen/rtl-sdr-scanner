@@ -13,26 +13,26 @@ def colored(string, color=None, background=None, attrs=None):
         return string
 
 
-def format_frequnecy(frequency):
+def format_frequency(frequency):
     if frequency == 0:
         return "0 Hz"
     else:
         return "{:,d} Hz".format(frequency)
 
 
-def format_frequnecy_power(frequency, power):
-    return "frequnecy: %14s, power: %6.2f dB %s" % (format_frequnecy(frequency), power, format_power(power))
+def format_frequency_power(frequency, power):
+    return "frequency: %14s, power: %6.2f dB %s" % (format_frequency(frequency), power, format_power(power))
 
 
 def format_frequnecies(frequencies):
-    return ", ".join([format_frequnecy(f) for f in frequencies])
+    return ", ".join([format_frequency(f) for f in frequencies])
 
 
-def format_frequnecy_range(start, stop, step=0):
+def format_frequency_range(start, stop, step=0):
     if step == 0:
-        return "%s - %s" % (format_frequnecy(start), format_frequnecy(stop))
+        return "%s - %s" % (format_frequency(start), format_frequency(stop))
     else:
-        return "%s - %s, step: %8s" % (format_frequnecy(start), format_frequnecy(stop), format_frequnecy(step))
+        return "%s - %s, step: %8s" % (format_frequency(start), format_frequency(stop), format_frequency(step))
 
 
 def format_bar(value, **kwargs):
@@ -72,11 +72,11 @@ def print_ignored_frequencies(ignored_frequencies_ranges):
     separator("ignored frequencies")
     logger = logging.getLogger("sdr")
     for range in ignored_frequencies_ranges:
-        logger.info("ignored frequency range user defined: %s" % (format_frequnecy_range(range["start"], range["stop"])))
+        logger.info("ignored frequency range user defined: %s" % (format_frequency_range(range["start"], range["stop"])))
 
 
 def print_frequencies_ranges(frequencies_ranges):
     separator("scanning ranges")
     logger = logging.getLogger("sdr")
     for range in frequencies_ranges:
-        logger.info("scanned frequency range: %s" % (format_frequnecy_range(range["start"], range["stop"])))
+        logger.info("scanned frequency range: %s" % (format_frequency_range(range["start"], range["stop"])))
