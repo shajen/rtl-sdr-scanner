@@ -11,7 +11,7 @@ import wave
 
 def record(device, frequency, power, width, config, **kwargs):
     logger = logging.getLogger("sdr")
-    logger.info("start recording %s" % sdr.tools.format_frequnecy_power(frequency, power))
+    logger.info("start recording %s" % sdr.tools.format_frequency_power(frequency, power))
     ppm_error = str(kwargs["ppm_error"])
     tuner_gain = str(kwargs["tuner_gain"])
     squelch = str(kwargs["squelch"])
@@ -50,7 +50,7 @@ def record(device, frequency, power, width, config, **kwargs):
             last_size = size
         time.sleep(max_silence_time)
 
-    logger.info("stop recording frequnecy: %s" % sdr.tools.format_frequnecy(frequency))
+    logger.info("stop recording frequency: %s" % sdr.tools.format_frequency(frequency))
     p1.terminate()
     p2.terminate()
     p1.wait()

@@ -91,7 +91,7 @@ def __scan(device, **kwargs):
         best_frequencies = best_frequencies[indexes]
         best_powers = best_powers[indexes]
         for i in range(len(best_frequencies)):
-            logger.debug(sdr.tools.format_frequnecy_power(int(best_frequencies[i]), float(best_powers[i])))
+            logger.debug(sdr.tools.format_frequency_power(int(best_frequencies[i]), float(best_powers[i])))
         if 1 < print_best_frequencies:
             logger.debug("-" * 80)
 
@@ -106,7 +106,7 @@ def __filter_ranges(**kwargs):
         if (stop - start) % bandwidth != 0:
             logger.warning(
                 "frequency range: %s error! range not fit to bandwidth: %s! skipping!"
-                % (sdr.tools.format_frequnecy_range(start, stop), sdr.tools.format_frequnecy(bandwidth))
+                % (sdr.tools.format_frequency_range(start, stop), sdr.tools.format_frequency(bandwidth))
             )
         else:
             ranges.append(_range)
