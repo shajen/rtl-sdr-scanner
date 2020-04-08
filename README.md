@@ -1,6 +1,24 @@
 # rtl-sdr scanner and recorder
 
-This project contains my rtl-sdr script written in python3 to scan and record interesting frequencies.
+This project contains my rtl-sdr script written in `python3` to scan and record interesting frequencies.
+
+## Prerequisites
+
+You need some tools to start the work.
+
+```
+python3 python3-pip rtl-sdr sox
+```
+
+Install it before continue. For example on Debian based distribution run follow commands:
+```
+sudo apt-get install python3 python3-pip rtl-sdr sox
+```
+
+Clone the repository into your local machine. After that, install needed libraries.
+```
+pip3 install --user -r requirements.txt
+```
 
 ## Configuration
 
