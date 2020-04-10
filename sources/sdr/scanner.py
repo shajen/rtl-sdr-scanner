@@ -44,7 +44,7 @@ def __filter_frequencies(frequencies, powers, **kwargs):
 
 def __detect_best_signal(frequencies, powers, filtered_frequencies, filtered_powers, **kwargs):
     try:
-        noise_level = int(kwargs["noise_level"])
+        noise_level = float(kwargs["noise_level"])
     except ValueError:
         i = np.argmax(filtered_powers)
         if abs(filtered_frequencies[i] - frequencies[len(frequencies) // 2]) <= 1000:
@@ -53,7 +53,7 @@ def __detect_best_signal(frequencies, powers, filtered_frequencies, filtered_pow
             noise_level = -100
 
     for i in range(len(filtered_frequencies)):
-        return (int(filtered_frequencies[i]), float(filtered_powers[i]), 12500, noise_level < filtered_powers[i])
+        return (int(filtered_frequencies[i]), float(filtered_powers[i]), 12500, noise_level < float(filtered_powers[i]))
 
     return (0, -100.0, 0, False)
 
