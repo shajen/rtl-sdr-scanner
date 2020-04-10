@@ -4,6 +4,7 @@
 import application_killer
 import datetime
 import logging
+import math
 import matplotlib.mlab
 import numpy as np
 import os
@@ -104,12 +105,14 @@ def __filter_ranges(**kwargs):
         start = _range["start"]
         stop = _range["stop"]
         if (stop - start) % bandwidth != 0:
+            _range["stop"] = start + (bandwidth * math.ceil((stop - start) / bandwidth))
             logger.warning(
-                "frequency range: %s error! range not fit to bandwidth: %s! skipping!"
-                % (sdr.tools.format_frequency_range(start, stop), sdr.tools.format_frequency(bandwidth))
+                "frequency range: %s error! range not fit to bandwidth: %s! adjusting range end to %s!",
+                sdr.tools.format_frequency_range(start, stop),
+                sdr.tools.format_frequency(bandwidth),
+                sdr.tools.format_frequency(_range["stop"]),
             )
-        else:
-            ranges.append(_range)
+        ranges.append(_range)
     if ranges:
         return ranges
     else:
