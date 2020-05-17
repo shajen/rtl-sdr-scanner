@@ -125,12 +125,15 @@ def run(**kwargs):
     sdr.tools.print_frequencies_ranges(kwargs["frequencies_ranges"])
     sdr.tools.separator("scanning started")
     kwargs["frequencies_ranges"] = __filter_ranges(**kwargs)
-
-    device = rtlsdr.RtlSdr()
-    device.ppm_error = kwargs["ppm_error"]
-    device.gain = kwargs["tuner_gain"]
-    device.sample_rate = kwargs["bandwidth"]
-
-    killer = application_killer.ApplicationKiller()
-    while killer.is_running:
-        __scan(device, **kwargs)
+    try:
+        device = rtlsdr.RtlSdr()
+        device.ppm_error = kwargs["ppm_error"]
+        device.gain = kwargs["tuner_gain"]
+        device.sample_rate = kwargs["bandwidth"]
+        killer = application_killer.ApplicationKiller()
+        while killer.is_running:
+            __scan(device, **kwargs)
+    except rtlsdr.rtlsdr.LibUSBError as e:
+        logger = logging.getLogger("sdr")
+        logger.critical("Device error, error message: " + str(e) + " quitting!")
+        exit(1)
