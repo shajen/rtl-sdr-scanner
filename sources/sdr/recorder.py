@@ -28,12 +28,12 @@ def record(device, frequency, power, config, **kwargs):
 
     device.close()
     p1 = subprocess.Popen(
-        ["rtl_fm", "-p", ppm_error, "-g", tuner_gain, "-M", modulation, "-f", str(frequency), "-l", squelch],
+        ["rtl_fm", "-p", ppm_error, "-g", tuner_gain, "-M", modulation, "-f", str(frequency),"-s", "32k", "-l", squelch],
         stdout=subprocess.PIPE,
         stderr=subprocess.DEVNULL,
     )
     p2 = subprocess.Popen(
-        ["sox", "-t", "raw", "-e", "signed", "-c", "1", "-b", "16", "-", filename],
+        ["sox", "-t", "raw", "-e", "signed", "-c", "1", "-b", "16", "-r", "32k", "-", filename],
         stdin=p1.stdout,
         stdout=subprocess.PIPE,
         stderr=subprocess.DEVNULL,
