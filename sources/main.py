@@ -40,9 +40,12 @@ if __name__ == "__main__":
     config_logger(args.verbose, args.log_directory)
     with open(args.config) as f:
         config = json.load(f)
+        ignored_frequencies_ranges = []
+        if "ignored_frequencies_ranges" in config:
+            ignored_frequencies_ranges = config["ignored_frequencies_ranges"]
         sdr.scanner.run(
             frequencies_ranges=config["frequencies_ranges"],
-            ignored_frequencies_ranges=config["ignored_frequencies_ranges"],
+            ignored_frequencies_ranges=ignored_frequencies_ranges,
             ppm_error=int(config["device"]["ppm_error"]),
             tuner_gain=config["device"]["tuner_gain"],
             squelch=config["recording"]["squelch"],
