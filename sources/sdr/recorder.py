@@ -19,6 +19,7 @@ def record(device, frequency, power, config, **kwargs):
     min_recording_time = kwargs["min_recording_time"]
     max_recording_time = kwargs["max_recording_time"]
     max_silence_time = kwargs["max_silence_time"]
+    samples_rate = kwargs["samples_rate"]
     modulation = config["modulation"]
 
     now = datetime.datetime.now()
@@ -28,12 +29,12 @@ def record(device, frequency, power, config, **kwargs):
 
     device.close()
     p1 = subprocess.Popen(
-        ["rtl_fm", "-p", ppm_error, "-g", tuner_gain, "-M", modulation, "-f", str(frequency),"-s", "32k", "-l", squelch],
+        ["rtl_fm", "-p", ppm_error, "-g", tuner_gain, "-M", modulation, "-f", str(frequency),"-s", samples_rate, "-l", squelch],
         stdout=subprocess.PIPE,
         stderr=subprocess.DEVNULL,
     )
     p2 = subprocess.Popen(
-        ["sox", "-t", "raw", "-e", "signed", "-c", "1", "-b", "16", "-r", "32k", "-", filename],
+        ["sox", "-t", "raw", "-e", "signed", "-c", "1", "-b", "16", "-r", samples_rate, "-", filename],
         stdin=p1.stdout,
         stdout=subprocess.PIPE,
         stderr=subprocess.DEVNULL,
