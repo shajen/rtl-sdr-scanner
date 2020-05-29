@@ -63,6 +63,7 @@
     "squelch": 5,
     "min_recording_time": 1,
     "max_recording_time": 60,
-    "max_silence_time": 1
+    "max_silence_time": 1,
+    "samples_rate" : "32k"
   }
 }

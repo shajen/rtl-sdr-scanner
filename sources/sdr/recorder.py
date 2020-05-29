@@ -9,7 +9,7 @@ import time
 import wave
 
 
-def record(device, frequency, power, width, config, **kwargs):
+def record(device, frequency, power, config, **kwargs):
     logger = logging.getLogger("sdr")
     logger.info("start recording %s" % sdr.tools.format_frequency_power(frequency, power))
     ppm_error = str(kwargs["ppm_error"])
@@ -19,7 +19,7 @@ def record(device, frequency, power, width, config, **kwargs):
     min_recording_time = kwargs["min_recording_time"]
     max_recording_time = kwargs["max_recording_time"]
     max_silence_time = kwargs["max_silence_time"]
-    width = str(width)
+    samples_rate = kwargs["samples_rate"]
     modulation = config["modulation"]
 
     now = datetime.datetime.now()
@@ -29,12 +29,12 @@ def record(device, frequency, power, width, config, **kwargs):
 
     device.close()
     p1 = subprocess.Popen(
-        ["rtl_fm", "-p", ppm_error, "-g", tuner_gain, "-M", modulation, "-f", str(frequency), "-s", width, "-l", squelch],
+        ["rtl_fm", "-p", ppm_error, "-g", tuner_gain, "-M", modulation, "-f", str(frequency),"-s", samples_rate, "-l", squelch],
         stdout=subprocess.PIPE,
         stderr=subprocess.DEVNULL,
     )
     p2 = subprocess.Popen(
-        ["sox", "-t", "raw", "-e", "signed", "-c", "1", "-b", "16", "-r", width, "-", filename],
+        ["sox", "-t", "raw", "-e", "signed", "-c", "1", "-b", "16", "-r", samples_rate, "-", filename],
         stdin=p1.stdout,
         stdout=subprocess.PIPE,
         stderr=subprocess.DEVNULL,

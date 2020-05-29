@@ -56,6 +56,7 @@ if __name__ == "__main__":
             min_recording_time=config["recording"]["min_recording_time"],
             max_recording_time=config["recording"]["max_recording_time"],
             max_silence_time=config["recording"]["max_silence_time"],
+            samples_rate=config["recording"]["samples_rate"],
             wav_directory=args.wav_directory,
             disable_recording=args.disable_recording,
             print_best_frequencies=args.print_best_frequencies,
