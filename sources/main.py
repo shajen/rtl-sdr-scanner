@@ -14,7 +14,7 @@ def config_logger(verbose, dir):
     levels = [logging.ERROR, logging.WARNING, logging.INFO, logging.DEBUG]
     level = levels[min(len(levels) - 1, verbose)]
 
-    params["format"] = "[%(asctime)s][%(levelname)7s][%(name)6s] %(message)s"
+    params["format"] = "[%(asctime)s.%(msecs)03d][%(levelname)7s][%(name)6s] %(message)s"
     params["level"] = level
     params["datefmt"] = "%Y-%m-%d %H:%M:%S"
 
@@ -48,15 +48,17 @@ if __name__ == "__main__":
             ignored_frequencies_ranges=ignored_frequencies_ranges,
             ppm_error=int(config["device"]["ppm_error"]),
             tuner_gain=config["device"]["tuner_gain"],
-            squelch=config["recording"]["squelch"],
             noise_level=config["scanning"]["noise_level"],
             bandwidth=config["scanning"]["bandwidth"],
             samples=config["scanning"]["samples"],
             fft=config["scanning"]["fft"],
+            peak_width=config["scanning"]["peak_width"],
             min_recording_time=config["recording"]["min_recording_time"],
             max_recording_time=config["recording"]["max_recording_time"],
             max_silence_time=config["recording"]["max_silence_time"],
             samples_rate=config["recording"]["samples_rate"],
+            samples_count_to_adjust_frequency=config["recording"]["samples_count_to_adjust_frequency"],
+            channel_width=config["recording"]["channel_width"],
             wav_directory=args.wav_directory,
             disable_recording=args.disable_recording,
             print_best_frequencies=args.print_best_frequencies,

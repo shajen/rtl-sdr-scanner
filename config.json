@@ -56,14 +56,16 @@
   "scanning": {
     "noise_level": -7.9,
     "bandwidth": 2000000,
-    "samples": 10240,
-    "fft": 16384
+    "samples": 1024000,
+    "fft": 16384,
+    "peak_width": 10
   },
   "recording": {
-    "squelch": 5,
-    "min_recording_time": 1,
-    "max_recording_time": 60,
-    "max_silence_time": 1,
-    "samples_rate" : "32k"
+    "min_recording_time": 4,
+    "max_recording_time": 600,
+    "max_silence_time": 2,
+    "samples_rate": 48000,
+    "samples_count_to_adjust_frequency": 100,
+    "channel_width": 12500
   }
 }

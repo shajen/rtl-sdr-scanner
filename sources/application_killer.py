@@ -5,9 +5,8 @@ import logging
 
 
 class ApplicationKiller:
-    is_running = True
-
     def __init__(self):
+        self.is_running = True
         signal.signal(signal.SIGINT, self.exit)
         signal.signal(signal.SIGTERM, self.exit)
 
