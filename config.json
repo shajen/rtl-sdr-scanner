@@ -1,71 +1,34 @@
 {
   "frequencies_ranges": [
     {
-      "start": 26000000,
-      "stop": 28000000,
-      "modulation": "am"
-    },
-    {
-      "start": 28000000,
-      "stop": 30000000,
-      "modulation": "fm"
-    },
-    {
-      "start": 50000000,
-      "stop": 52000000,
-      "modulation": "fm"
-    },
-    {
-      "start": 108000000,
-      "stop": 144000000,
-      "modulation": "am"
-    },
-    {
       "start": 144000000,
       "stop": 146000000,
-      "modulation": "fm"
-    },
-    {
-      "start": 430000000,
-      "stop": 440000000,
-      "modulation": "fm"
+      "step": 125
     }
   ],
   "ignored_frequencies_ranges": [
     {
-      "start": 28799000,
-      "stop": 28801000
-    },
-    {
-      "start": 115199000,
-      "stop": 115201000
-    },
-    {
-      "start": 438470000,
-      "stop": 438490000
-    },
-    {
-      "start": 439000000,
-      "stop": 439010000
+      "start": 145001000,
+      "stop": 146002000
     }
   ],
   "device": {
     "ppm_error": 0,
-    "tuner_gain": 0
-  },
-  "scanning": {
-    "noise_level": -7.9,
-    "bandwidth": 2000000,
-    "samples": 1024000,
-    "fft": 16384,
-    "peak_width": 10
+    "tuner_gain": 0,
+    "min_bandwidth": 1000000,
+    "max_bandwidth": 2400000
   },
   "recording": {
-    "min_recording_time": 4,
-    "max_recording_time": 600,
-    "max_silence_time": 2,
-    "samples_rate": 48000,
-    "samples_count_to_adjust_frequency": 100,
-    "channel_width": 12500
+    "noise_level": -4,
+    "max_silence_time": 1,
+    "min_recording_time": 2,
+    "max_recording_time": 60,
+    "wav_sample_rate": 44100
+  },
+  "expert_only": {
+    "peak_width": 10,
+    "buffer_size_mb": 200,
+    "recording_max_bandwidth": 300000,
+    "recording_frequency_shift": 50000
   }
 }

@@ -28,11 +28,11 @@ def format_frequnecies(frequencies):
     return ", ".join([format_frequency(f) for f in frequencies])
 
 
-def format_frequency_range(start, stop, step=0):
-    if step == 0:
+def format_frequency_range(start, stop, step=0, bandwidth=0):
+    if step == 0 or bandwidth == 0:
         return "%s - %s" % (format_frequency(start), format_frequency(stop))
     else:
-        return "%s - %s, step: %8s" % (format_frequency(start), format_frequency(stop), format_frequency(step))
+        return "%s - %s, step: %8s, bandwidth: %s" % (format_frequency(start), format_frequency(stop), format_frequency(step), format_frequency(bandwidth))
 
 
 def format_bar(value, **kwargs):
@@ -68,15 +68,11 @@ def separator(label, **kwargs):
     logger.info("#" * length)
 
 
-def print_ignored_frequencies(ignored_frequencies_ranges):
-    separator("ignored frequencies")
+def print_frequencies(frequencies, label):
+    separator(label)
     logger = logging.getLogger("sdr")
-    for range in ignored_frequencies_ranges:
-        logger.info("ignored frequency range user defined: %s" % (format_frequency_range(range["start"], range["stop"])))
-
-
-def print_frequencies_ranges(frequencies_ranges):
-    separator("scanning ranges")
-    logger = logging.getLogger("sdr")
-    for range in frequencies_ranges:
-        logger.info("scanned frequency range: %s" % (format_frequency_range(range["start"], range["stop"])))
+    for range in frequencies:
+        if "step" in range and "bandwidth" in range:
+            logger.info("frequency range: %s" % (format_frequency_range(range["start"], range["stop"], range["step"], range["bandwidth"])))
+        else:
+            logger.info("frequency range: %s" % (format_frequency_range(range["start"], range["stop"])))

@@ -14,7 +14,7 @@ def config_logger(verbose, dir):
     levels = [logging.ERROR, logging.WARNING, logging.INFO, logging.DEBUG]
     level = levels[min(len(levels) - 1, verbose)]
 
-    params["format"] = "[%(asctime)s.%(msecs)03d][%(levelname)7s][%(name)6s] %(message)s"
+    params["format"] = "[%(asctime)s.%(msecs)03d][%(levelname)7s][%(name)8s] %(message)s"
     params["level"] = level
     params["datefmt"] = "%Y-%m-%d %H:%M:%S"
 
@@ -47,18 +47,18 @@ if __name__ == "__main__":
             frequencies_ranges=config["frequencies_ranges"],
             ignored_frequencies_ranges=ignored_frequencies_ranges,
             ppm_error=int(config["device"]["ppm_error"]),
+            min_bandwidth=config["device"]["min_bandwidth"],
+            max_bandwidth=config["device"]["max_bandwidth"],
             tuner_gain=config["device"]["tuner_gain"],
-            noise_level=config["scanning"]["noise_level"],
-            bandwidth=config["scanning"]["bandwidth"],
-            samples=config["scanning"]["samples"],
-            fft=config["scanning"]["fft"],
-            peak_width=config["scanning"]["peak_width"],
+            noise_level=config["recording"]["noise_level"],
+            peak_width=config["expert_only"]["peak_width"],
+            buffer_size_mb=config["expert_only"]["buffer_size_mb"],
+            recording_max_bandwidth=config["expert_only"]["recording_max_bandwidth"],
+            recording_frequency_shift=config["expert_only"]["recording_frequency_shift"],
             min_recording_time=config["recording"]["min_recording_time"],
             max_recording_time=config["recording"]["max_recording_time"],
             max_silence_time=config["recording"]["max_silence_time"],
-            samples_rate=config["recording"]["samples_rate"],
-            samples_count_to_adjust_frequency=config["recording"]["samples_count_to_adjust_frequency"],
-            channel_width=config["recording"]["channel_width"],
+            wav_sample_rate=config["recording"]["wav_sample_rate"],
             wav_directory=args.wav_directory,
             disable_recording=args.disable_recording,
             print_best_frequencies=args.print_best_frequencies,
