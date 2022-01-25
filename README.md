@@ -1,3 +1,7 @@
+# DEPRECATED
+
+Project is no longer maintained. Please visit ***new version of project*** written in c++ here [rtl-sdr-scanner-cpp](https://github.com/shajen/rtl-sdr-scanner-cpp).
+
 # rtl-sdr scanner and recorder
 
 This project contains my rtl-sdr script written in `python3` to scan and record interesting frequencies. See video below for details.
